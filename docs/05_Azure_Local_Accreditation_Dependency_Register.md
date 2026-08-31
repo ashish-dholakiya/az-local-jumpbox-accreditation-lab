@@ -42,6 +42,7 @@ These are prerequisites that must exist or be validated in the accreditation env
 | Tooling | PowerShell 7 | Used for controlled execution from VS Code. | PASS |
 | Tooling | Azure CLI | Required for authentication, subscription validation, provider operations, resource verification, and deployment. | PASS |
 | Tooling | Bicep CLI | Required for the official LocalBox Bicep deployment workflow. | PASS |
+| Tooling | `Az.Resources` PowerShell module `10.1.0` | Provides `New-AzResourceGroupDeployment`, matching the Azure PowerShell deployment pattern used by Microsoft's LocalBox validation pipeline. | PASS |
 | Source Control | Accreditation repository cloned locally | Provides persistent access to the accreditation source of truth and implementation documentation. | PASS |
 | Source Control | Microsoft `azure_arc` repository cloned separately | Keeps Microsoft deployment source separate from accreditation documentation and avoids nested Git repository issues. | PASS |
 | Source Control | Microsoft repository pinned to exact commit | Avoids dependence on a moving source branch and improves repeatability. | PASS |
@@ -91,7 +92,7 @@ The Microsoft repository also contains engineering and integration-testing contr
 | Microsoft validation control | Purpose in Microsoft engineering | Accreditation treatment |
 | --- | --- | --- |
 | Azure DevOps pipeline | Automates Microsoft LocalBox deployment and test execution | Reference only. We are not required to run Microsoft's internal pipeline to perform the accreditation PoC. |
-| `New-AzResourceGroupDeployment` with `TemplateParameterObject` | Microsoft pipeline deployment pattern for passing Bicep parameters | Used as a supported-pattern reference while designing our secure local deployment flow. |
+| `New-AzResourceGroupDeployment` with `TemplateParameterObject` | Microsoft pipeline deployment pattern for passing Bicep parameters | Used as a supported-pattern reference while designing our secure local deployment flow. `Az.Resources 10.1.0` is now installed locally to support this deployment pattern. |
 | Secure pipeline variable for Windows administrator password | Keeps the administrator password out of source code | Security pattern to follow. The actual password must remain runtime-only in our implementation. |
 | Pester integration tests | Automated validation of deployed LocalBox behavior | Microsoft engineering validation mechanism. Not classified as a mandatory accreditation dependency unless we explicitly decide to run equivalent tests. |
 | Automated teardown | Removes Microsoft test resource groups after validation or failure | Useful operational reference for cost control and cleanup, but not itself a prerequisite for deployment. |
@@ -175,6 +176,16 @@ HTTP Status: 200
 
 This allows the deployment to use the exact commit reference for runtime artifacts instead of relying on a moving `main` branch.
 
+#### Azure PowerShell deployment module
+
+Microsoft's LocalBox validation pipeline uses `New-AzResourceGroupDeployment` with a parameter object. Local availability was checked and `Az.Resources` was initially absent. It was installed for the current user and then verified as:
+
+```text
+Az.Resources 10.1.0
+```
+
+Status: **PASS**.
+
 ---
 
 ## 4. Execution Continuity Dependency
@@ -189,6 +200,7 @@ Verified local components:
 - PowerShell `7.6.5`.
 - Azure CLI `2.89.1`.
 - Bicep CLI `0.46.1`.
+- Az.Resources PowerShell module `10.1.0`.
 - Local accreditation repository.
 - Separate local Microsoft `azure_arc` repository.
 - Dedicated Azure CLI profile for accreditation.
@@ -229,6 +241,7 @@ The Microsoft LocalBox Bicep template marks the Windows administrator password a
 - Direct LocalBox Bicep provider dependencies.
 - Azure CLI.
 - Bicep CLI.
+- Az.Resources PowerShell module `10.1.0`.
 - Official Microsoft source pinning.
 - Runtime artifact exact-commit reachability.
 - Persistent VS Code execution environment.
@@ -271,6 +284,7 @@ This document must feed the accreditation presentation.
 
 - Validated company subscription, Owner access, Central India region, quota, and VM SKU availability.
 - Validated and registered required Azure Local, Arc, Compute, Network, Storage, Monitoring, and Log Analytics resource providers.
+- Validated local deployment tooling including Azure CLI, Bicep, PowerShell 7, and `Az.Resources 10.1.0`.
 - Moved execution from Cloud Shell to a persistent VS Code workflow to avoid session loss.
 - Isolated the accreditation Azure CLI profile from other Azure projects on the workstation.
 - Pinned the official Microsoft LocalBox source and validated runtime artifact reachability.
