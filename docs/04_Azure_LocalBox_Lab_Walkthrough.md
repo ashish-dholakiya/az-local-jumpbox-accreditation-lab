@@ -304,27 +304,26 @@ Microsoft.Resources
 Microsoft.Storage
 ```
 
-### Verified provider registration state
+Initial verification found `Microsoft.Network` and `Microsoft.OperationalInsights` unregistered. Both were then registered and re-verified.
+
+### Final verified provider registration state
 
 ```text
 Microsoft.Authorization : Registered
 Microsoft.Compute : Registered
-Microsoft.Network : NotRegistered
-Microsoft.OperationalInsights : NotRegistered
+Microsoft.Network : Registered
+Microsoft.OperationalInsights : Registered
 Microsoft.Resources : Registered
 Microsoft.Storage : Registered
 ```
 
 ### Status
 
-**PARTIAL PASS.** Runtime commit pinning is validated. Four directly referenced providers are already registered. Two directly referenced providers remain unregistered and must be registered before billable LocalBox deployment:
-
-- `Microsoft.Network`
-- `Microsoft.OperationalInsights`
+**PASS.** Runtime exact-commit artifact reachability is validated and all directly referenced provider namespaces are now registered.
 
 ### Change impact
 
-**Read-only validation only.** No provider registrations or Azure workload resources were changed by this step.
+**Azure subscription change.** `Microsoft.Network` and `Microsoft.OperationalInsights` were registered at the subscription level. No LocalBox workload resources were created by provider registration.
 
 ---
 
@@ -346,8 +345,9 @@ Microsoft.Storage : Registered
 | Runtime source-reference validation | PASS |
 | Runtime artifact exact-commit reachability | PASS |
 | Direct provider dependency discovery | PASS |
-| Microsoft.Network registration | PENDING |
-| Microsoft.OperationalInsights registration | PENDING |
+| Microsoft.Network registration | PASS |
+| Microsoft.OperationalInsights registration | PASS |
+| Final predeployment validation | PENDING |
 | Billable LocalBox resource deployment | NOT STARTED |
 | Azure Local cluster deployment / review | NOT STARTED |
 | Azure Arc validation | NOT STARTED |
@@ -358,4 +358,4 @@ Microsoft.Storage : Registered
 
 ## Next Required Step
 
-Register only the two directly required providers that are currently unregistered, `Microsoft.Network` and `Microsoft.OperationalInsights`, then verify both reach `Registered`. After that, re-synchronize the local accreditation repository and continue to final secure parameter preparation and predeployment validation.
+Re-synchronize the local accreditation repository, then perform final predeployment validation of the exact LocalBox parameters and deployment command without creating billable resources. Only after that validation passes should the billable LocalBox deployment be started.
