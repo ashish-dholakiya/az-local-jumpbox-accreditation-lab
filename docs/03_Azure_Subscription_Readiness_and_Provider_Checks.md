@@ -77,15 +77,15 @@ The signed-in identity has an **Owner** role inherited from a parent management 
 
 ---
 
-## 3. Check Azure Local and Azure Arc Resource Providers
+## 3. Check Azure Local, Azure Arc and Compute Resource Providers
 
 ### What this check does
 
-Reads the registration state of the Azure resource providers used by Azure Local, Azure Arc, Azure Local VM management, monitoring and supporting services.
+Reads the registration state of the Azure resource providers used by Azure Local, Azure Arc, Azure Local VM management, monitoring, supporting services and Azure Compute quota/SKU operations.
 
 ### Why we run it
 
-Azure Local does not rely on a single Azure namespace. Different capabilities use different resource providers, so a fresh subscription must be checked before deployment.
+Azure Local does not rely on a single Azure namespace. Different capabilities use different resource providers, so a fresh subscription must be checked before deployment. `Microsoft.Compute` is also required for VM operations and for reliable compute quota checks.
 
 ### Command
 
@@ -102,7 +102,8 @@ $providers = @(
     "Microsoft.Attestation",
     "Microsoft.Storage",
     "Microsoft.KeyVault",
-    "Microsoft.Insights"
+    "Microsoft.Insights",
+    "Microsoft.Compute"
 )
 
 foreach ($provider in $providers) {
@@ -115,7 +116,7 @@ foreach ($provider in $providers) {
 
 ### Initial result
 
-The company subscription was effectively fresh. `Microsoft.GuestConfiguration` was already registered, while the remaining core providers were not registered.
+The company subscription was effectively fresh. `Microsoft.GuestConfiguration` was already registered, while the remaining core Azure Local and Arc providers were not registered. `Microsoft.Compute` was subsequently validated as part of compute-readiness troubleshooting before quota evidence was collected.
 
 ### Change impact
 
@@ -139,6 +140,7 @@ The company subscription was effectively fresh. `Microsoft.GuestConfiguration` w
 | `Microsoft.Storage` | Azure Storage resources used by deployment or operational workflows. |
 | `Microsoft.KeyVault` | Secrets, certificates and deployment dependencies that use Azure Key Vault. |
 | `Microsoft.Insights` | Azure Monitor, diagnostics and monitoring integration. |
+| `Microsoft.Compute` | Azure VM operations, VM SKU discovery and regional / VM-family compute quota checks. |
 
 `Microsoft.HybridContainerService` is not part of the current core registration set because the accreditation scope does not currently require an AKS-on-Azure-Local demonstration. It can be enabled later if the lab scope expands.
 
@@ -168,7 +170,8 @@ $providersToRegister = @(
     "Microsoft.Attestation",
     "Microsoft.Storage",
     "Microsoft.KeyVault",
-    "Microsoft.Insights"
+    "Microsoft.Insights",
+    "Microsoft.Compute"
 )
 
 foreach ($provider in $providersToRegister) {
@@ -206,27 +209,11 @@ foreach ($provider in $providersToRegister) {
 
 ### Verified result
 
-The following providers were confirmed as **Registered** on the company lab subscription:
-
-```text
-Microsoft.AzureStackHCI               Registered
-Microsoft.HybridCompute               Registered
-Microsoft.HybridConnectivity          Registered
-Microsoft.ResourceConnector           Registered
-Microsoft.Kubernetes                  Registered
-Microsoft.KubernetesConfiguration     Registered
-Microsoft.ExtendedLocation            Registered
-Microsoft.Attestation                 Registered
-Microsoft.Storage                     Registered
-Microsoft.KeyVault                    Registered
-Microsoft.Insights                    Registered
-```
-
-`Microsoft.GuestConfiguration` was already registered before the registration step.
+The required Azure Local and Azure Arc providers were confirmed as **Registered** on the company lab subscription. `Microsoft.GuestConfiguration` was already registered before the registration step. `Microsoft.Compute` was also made available before compute quota validation.
 
 ### Readiness status
 
-**PASS.** Core Azure Local and Azure Arc resource-provider readiness is complete for the current lab scope.
+**PASS.** Resource-provider readiness is complete for the current lab scope.
 
 ### Change impact
 
@@ -258,7 +245,7 @@ Displays Azure Compute quota and current usage for Central India.
 
 ### Why we run it
 
-LocalBox requires a relatively large Azure VM. Even when permissions and providers are ready, insufficient regional or VM-family quota can block deployment.
+LocalBox uses a large Azure VM. Even when permissions and providers are ready, insufficient regional or VM-family quota can block deployment.
 
 ### Command
 
@@ -268,14 +255,20 @@ az vm list-usage `
     -o table
 ```
 
-### What to review
+### Verified result
 
-Pay particular attention to:
+The company lab subscription currently has the following Central India compute capacity:
 
-- Total Regional vCPUs
-- The VM-family quota for the LocalBox VM SKU
-- Current regional usage
-- Remaining vCPU headroom
+```text
+Total Regional vCPUs              Used: 0    Limit: 100
+Standard Esv6 Family vCPUs        Used: 0    Limit: 100
+```
+
+The planned `Standard_E32s_v6` LocalBox host requires 32 vCPUs. The subscription therefore has sufficient headroom in both the regional quota and the Esv6 family quota.
+
+### Readiness status
+
+**PASS.** No compute quota increase is currently required for a single 32-vCPU LocalBox host in Central India.
 
 ### Change impact
 
@@ -287,33 +280,37 @@ Pay particular attention to:
 
 ### What this command does
 
-Checks whether candidate LocalBox VM SKUs are available in Central India and whether Azure reports any subscription restrictions.
+Checks whether the candidate LocalBox VM SKU is available in Central India.
 
 ### Why we run it
 
-Quota alone is not enough. The selected VM SKU must also be available to this subscription in the chosen region.
+Quota alone is not enough. The selected VM size must also be available in the target region.
 
-### Commands
-
-```powershell
-az vm list-skus `
-    --location centralindia `
-    --size Standard_E32s_v6 `
-    --all `
-    --query "[].{Name:name,Restrictions:restrictions}" `
-    -o json
-```
-
-Compare with:
+### Lightweight validation command used during the lab
 
 ```powershell
-az vm list-skus `
+az vm list-sizes `
     --location centralindia `
-    --size Standard_E32s_v5 `
-    --all `
-    --query "[].{Name:name,Restrictions:restrictions}" `
-    -o json
+    --query "[?name=='Standard_E32s_v6']" `
+    -o table
 ```
+
+> `az vm list-sizes` is deprecated, but it returned a valid lightweight SKU-availability check when `az vm list-skus --all` was slow in Cloud Shell. For future runs, prefer `az vm list-skus` where practical.
+
+### Verified result
+
+`Standard_E32s_v6` was returned in Central India with:
+
+```text
+Name:              Standard_E32s_v6
+NumberOfCores:     32
+MemoryInMB:        262144
+MaxDataDiskCount:  64
+```
+
+### Readiness status
+
+**PASS.** `Standard_E32s_v6` is visible in Central India for the current subscription context.
 
 ### Change impact
 
@@ -353,8 +350,8 @@ For the accreditation walkthrough, capture the following without exposing confid
 4. Provider registration commands used.
 5. Final provider registration status.
 6. Central India region decision.
-7. Central India quota output.
-8. LocalBox VM SKU availability result.
+7. Central India quota result.
+8. `Standard_E32s_v6` availability result.
 9. Azure CLI and Bicep version checks.
 10. Final deployment readiness decision.
 
@@ -368,12 +365,12 @@ The repository is public. Full subscription IDs, credentials, secrets and intern
 | --- | --- |
 | Correct company subscription active | PASS |
 | Effective Owner access | PASS |
-| Required Azure Local / Arc providers | PASS |
+| Required Azure Local / Arc / Compute providers | PASS |
 | Target region selected: Central India | PASS |
-| Central India compute quota | PENDING |
-| LocalBox VM SKU availability | PENDING |
+| Central India compute quota | PASS |
+| `Standard_E32s_v6` availability | PASS |
 | Azure CLI readiness | PENDING |
 | Bicep readiness | PENDING |
 | Final LocalBox deployment decision | PENDING |
 
-The next implementation step is to validate **Central India compute quota and LocalBox VM SKU availability** before any billable deployment starts.
+The next implementation step is to validate **Azure CLI and Bicep readiness**, followed by the final LocalBox pre-deployment GO / NO-GO review before any billable lab resources are created.
