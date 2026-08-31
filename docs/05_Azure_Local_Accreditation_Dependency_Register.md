@@ -18,7 +18,7 @@ Recommended presentation section:
 
 Recommended message:
 
-> Before deploying the Azure Local Jumpstart LocalBox environment, we validated subscription access, region and quota readiness, tooling, Azure resource-provider registrations, source reproducibility, and execution continuity. Dependencies that were not obvious at the beginning of the implementation were converted into a formal dependency register so that the proof of concept remains repeatable, auditable, and controlled.
+> Before deploying the Azure Local Jumpstart LocalBox environment, we validated subscription access, region and quota readiness, tooling, Azure resource-provider registrations, source reproducibility, execution continuity, and secure runtime secret input. Dependencies that were not obvious at the beginning of the implementation were converted into a formal dependency register so that the proof of concept remains repeatable, auditable, and controlled.
 
 ---
 
@@ -64,7 +64,7 @@ These are prerequisites that must exist or be validated in the accreditation env
 | Execution Continuity | Dedicated Azure CLI profile | Isolates the accreditation Azure login/subscription context from other Azure projects on the same workstation. | PASS |
 | Execution Continuity | Local VS Code workflow | Avoids dependency on ephemeral Cloud Shell sessions for long-running accreditation work. | PASS |
 | Execution Continuity | Resume helper script | Allows the implementation session to be safely resumed after terminal closure or laptop restart. | PASS |
-| Security | Secure Windows administrator password input | Mandatory LocalBox deployment parameter. The value must not be stored in the public repository, chat, or evidence screenshots. | PENDING |
+| Security | Secure Windows administrator password input | Mandatory LocalBox deployment parameter. Runtime input was validated with PowerShell `Read-Host -AsSecureString`; the value was not printed or stored in evidence. | PASS |
 | Deployment | Final LocalBox deployment command validation | Required before billable LocalBox resources are created. | PENDING |
 | Deployment | LocalBox resource deployment | Creates the Azure Local Jumpstart LocalBox lab resources and begins billable workload deployment. | NOT STARTED |
 
@@ -93,7 +93,7 @@ The Microsoft repository also contains engineering and integration-testing contr
 | --- | --- | --- |
 | Azure DevOps pipeline | Automates Microsoft LocalBox deployment and test execution | Reference only. We are not required to run Microsoft's internal pipeline to perform the accreditation PoC. |
 | `New-AzResourceGroupDeployment` with `TemplateParameterObject` | Microsoft pipeline deployment pattern for passing Bicep parameters | Used as a supported-pattern reference while designing our secure local deployment flow. `Az.Resources 10.1.0` is now installed locally to support this deployment pattern. |
-| Secure pipeline variable for Windows administrator password | Keeps the administrator password out of source code | Security pattern to follow. The actual password must remain runtime-only in our implementation. |
+| Secure pipeline variable for Windows administrator password | Keeps the administrator password out of source code | Security pattern to follow. Our runtime-only secure input method was validated locally without exposing the secret. |
 | Pester integration tests | Automated validation of deployed LocalBox behavior | Microsoft engineering validation mechanism. Not classified as a mandatory accreditation dependency unless we explicitly decide to run equivalent tests. |
 | Automated teardown | Removes Microsoft test resource groups after validation or failure | Useful operational reference for cost control and cleanup, but not itself a prerequisite for deployment. |
 | Scheduled pipeline runs | Repeatedly validate current Microsoft LocalBox source | Microsoft CI practice, not a deployment requirement for our accreditation lab. |
@@ -186,6 +186,25 @@ Az.Resources 10.1.0
 
 Status: **PASS**.
 
+#### Secure Windows administrator password input
+
+The LocalBox Windows administrator password was captured through PowerShell using a secure prompt:
+
+```powershell
+$localBoxPassword = Read-Host "Enter LocalBox Windows admin password" -AsSecureString
+```
+
+Validation output intentionally exposed only the capture state and object type:
+
+```text
+Secure password captured: True
+Object type: System.Security.SecureString
+```
+
+The secret value was not printed or stored in the public evidence trail.
+
+Status: **PASS**.
+
 ---
 
 ## 4. Execution Continuity Dependency
@@ -222,9 +241,9 @@ The following values must not be committed to the public accreditation repositor
 - Confidential internal documentation.
 - Sensitive screenshots.
 
-The Windows administrator password required by the LocalBox template remains a runtime-only secure input.
+The Windows administrator password required by the LocalBox template is a runtime-only secure input.
 
-The Microsoft LocalBox Bicep template marks the Windows administrator password as a secure parameter. Microsoft's own validation pipeline passes the value through a deployment parameter object rather than embedding the secret into the Bicep source. Our deployment method should preserve the same security objective even if the local execution mechanism differs from Microsoft's internal CI pipeline.
+The Microsoft LocalBox Bicep template marks the Windows administrator password as a secure parameter. Microsoft's own validation pipeline passes the value through a deployment parameter object rather than embedding the secret into the Bicep source. Our local validation confirmed that PowerShell can capture the password as `System.Security.SecureString` without displaying the secret value.
 
 ---
 
@@ -246,11 +265,11 @@ The Microsoft LocalBox Bicep template marks the Windows administrator password a
 - Runtime artifact exact-commit reachability.
 - Persistent VS Code execution environment.
 - Resume workflow.
+- Secure runtime Windows administrator password input.
 
 ### Pending before billable deployment
 
-1. Validate the local secure password-handling/deployment mechanism.
-2. Final LocalBox deployment command validation.
+1. Final LocalBox deployment command validation.
 
 ### Not started
 
@@ -285,6 +304,7 @@ This document must feed the accreditation presentation.
 - Validated company subscription, Owner access, Central India region, quota, and VM SKU availability.
 - Validated and registered required Azure Local, Arc, Compute, Network, Storage, Monitoring, and Log Analytics resource providers.
 - Validated local deployment tooling including Azure CLI, Bicep, PowerShell 7, and `Az.Resources 10.1.0`.
+- Validated secure runtime password capture without exposing the secret in source or evidence.
 - Moved execution from Cloud Shell to a persistent VS Code workflow to avoid session loss.
 - Isolated the accreditation Azure CLI profile from other Azure projects on the workstation.
 - Pinned the official Microsoft LocalBox source and validated runtime artifact reachability.
@@ -312,8 +332,8 @@ This document must feed the accreditation presentation.
 
 ### Suggested slide: Current Build Readiness
 
-- Subscription, access, region, quota, tooling, source, runtime references, and direct provider dependencies: **Ready**.
-- Pending before deployment: secure password handling and final deployment command validation.
+- Subscription, access, region, quota, tooling, source, runtime references, direct provider dependencies, and secure password input: **Ready**.
+- Pending before deployment: final deployment command validation.
 - LocalBox workload deployment: **Not Started**.
 
 ---
