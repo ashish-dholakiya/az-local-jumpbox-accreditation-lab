@@ -48,24 +48,7 @@ git ls-remote https://github.com/microsoft/azure_arc.git HEAD
 
 ### What was done
 
-The official Microsoft `azure_arc` repository was cloned into Azure Cloud Shell and checked out at the exact verified commit rather than relying on a moving branch state.
-
-### Commands
-
-```powershell
-cd ~
-
-git clone https://github.com/microsoft/azure_arc.git
-cd ./azure_arc
-
-git checkout 3f433866757688d926ae6707e9c0041d8e640b82
-
-git status
-git rev-parse HEAD
-
-Set-Location ./azure_jumpstart_localbox/bicep
-Get-ChildItem
-```
+The official Microsoft `azure_arc` repository was cloned and checked out at the exact verified commit rather than relying on a moving branch state.
 
 ### Verified result
 
@@ -83,11 +66,11 @@ Update LocalBox to use image version 2608 (#3521)
 
 ### Status
 
-**PASS.** Official LocalBox deployment source is pinned and reproducible.
+**PASS.** Official LocalBox deployment source is pinned locally.
 
 ### Change impact
 
-Changes only the Cloud Shell working directory by downloading repository files. No Azure workload resources were created.
+Local filesystem only. No Azure workload resources were created.
 
 ---
 
@@ -125,7 +108,7 @@ The official template supports `Standard_E32s_v6` and includes `centralindia` as
 
 ### What was done
 
-The two mandatory identity-related LocalBox inputs were retrieved in Azure Cloud Shell without printing their actual values into the evidence output.
+The two mandatory identity-related LocalBox inputs were retrieved without printing their actual values into the evidence output.
 
 ### Commands
 
@@ -162,55 +145,29 @@ The actual Tenant ID and Azure Local Resource Provider object ID are intentional
 
 ## 5. Lock LocalBox Deployment Parameters
 
-### What was done
-
-The deployment configuration was defined and printed in Azure Cloud Shell before any Azure workload resources were created.
-
 ### Verified configuration
 
 | Parameter | Locked value | Reason |
 | --- | --- | --- |
 | Resource group | `rg-azlocal-localbox-accreditation-ci` | Dedicated accreditation lab boundary and easy cleanup. |
 | `location` | `centralindia` | Keeps supporting Azure resources in the selected lab region. |
-| `azureLocalInstanceLocation` | `centralindia` | Registers the Azure Local instance in the same selected region and is allowed by the pinned LocalBox template. |
-| `vmSize` | `Standard_E32s_v6` | Supported by the pinned LocalBox template and previously validated for Central India quota and availability. |
+| `azureLocalInstanceLocation` | `centralindia` | Registers the Azure Local instance in the selected region and is allowed by the pinned LocalBox template. |
+| `vmSize` | `Standard_E32s_v6` | Supported by the pinned LocalBox template and validated for Central India quota and availability. |
 | `windowsAdminUsername` | `arcdemo` | Uses the LocalBox reference username. |
-| `deployBastion` | `false` | Avoids an additional service unless the required lab outcome later depends on it. |
+| `deployBastion` | `false` | Avoids an additional service unless a required lab outcome depends on it. |
 | `autoDeployClusterResource` | `true` | Supports the required Activity 3 Azure Local cluster deployment / review outcome. |
-| `autoUpgradeClusterResource` | `false` | Cluster deployment will be validated before any optional upgrade workflow is introduced. |
+| `autoUpgradeClusterResource` | `false` | Cluster deployment will be validated before any upgrade workflow is introduced. |
 | `enableAzureSpotPricing` | `false` | Avoids Spot eviction risk during an accreditation lab. |
 | `vmAutologon` | `true` | Retains the LocalBox lab automation behavior. |
-| `governResourceTags` | `false` | The template states its special CostControl and SecurityControl tags are intended for Microsoft-internal Azure lab tenants; they are not assumed for this company subscription. |
-
-### Verification output
-
-The Cloud Shell output confirmed the values above, including:
-
-```text
-Resource Group: rg-azlocal-localbox-accreditation-ci
-Azure Resource Location: centralindia
-Azure Local Instance Location: centralindia
-VM Size: Standard_E32s_v6
-Windows Admin Username: arcdemo
-Deploy Bastion: False
-Auto Deploy Cluster: True
-Auto Upgrade Cluster: False
-Spot Pricing: False
-VM Autologon: True
-Govern Resource Tags: False
-```
+| `governResourceTags` | `false` | Avoids assuming that Microsoft-internal lab governance tags apply to this subscription. |
 
 ### Security note
 
-The Windows administrator password is not stored in this public repository and was intentionally excluded from this parameter-lock evidence. It will be supplied securely at deployment time.
+The Windows administrator password is not stored in this public repository. It will be supplied securely at deployment time.
 
 ### Status
 
 **PASS.** Final non-secret LocalBox deployment parameter values are locked and verified.
-
-### Change impact
-
-**Local Cloud Shell preparation only.** No Azure workload resources were created or modified.
 
 ---
 
@@ -219,24 +176,6 @@ The Windows administrator password is not stored in this public repository and w
 ### What was done
 
 A dedicated Azure resource group was created in Central India to contain the accreditation LocalBox deployment and simplify implementation tracking and later cleanup.
-
-### Command
-
-```powershell
-az group create `
-    --name $resourceGroupName `
-    --location $location `
-    --tags Project=AzureLocalAccreditation Environment=Lab Purpose=LocalBox
-```
-
-### Verification command
-
-```powershell
-az group show `
-    --name $resourceGroupName `
-    --query "{Name:name,Location:location,ProvisioningState:properties.provisioningState}" `
-    -o table
-```
 
 ### Verified result
 
@@ -260,7 +199,7 @@ rg-azlocal-localbox-accreditation-ci  centralindia  Succeeded
 
 ### What was done
 
-The accreditation workflow was moved from an ephemeral Cloud Shell session to a persistent local VS Code PowerShell workflow on the personal laptop.
+The accreditation workflow was moved from an ephemeral Cloud Shell session to a persistent local VS Code PowerShell workflow.
 
 The following were verified locally:
 
@@ -270,9 +209,9 @@ The following were verified locally:
 - Accreditation repository cloned to `C:\Projects\az-local-jumpbox-accreditation-lab` on branch `main` with a clean working tree.
 - Official Microsoft `azure_arc` repository cloned separately to `C:\Projects\azure_arc`.
 - Microsoft source pinned to `3f433866757688d926ae6707e9c0041d8e640b82` with a clean detached HEAD.
-- Dedicated Azure CLI profile path configured as `C:\AzureCLIProfiles\AzureLocalAccreditation` so this accreditation login context remains isolated from other Azure projects on the same laptop.
-- Correct accreditation subscription was authenticated and selected in the isolated Azure CLI profile.
-- Existing accreditation resource group was visible from the local VS Code session with provisioning state `Succeeded`.
+- Dedicated Azure CLI profile configured at `C:\AzureCLIProfiles\AzureLocalAccreditation` so the accreditation login context remains isolated from other Azure projects.
+- Correct accreditation subscription authenticated and selected in the isolated Azure CLI profile.
+- Existing accreditation resource group visible from the local VS Code session with provisioning state `Succeeded`.
 
 A local-only helper script was created at:
 
@@ -280,11 +219,9 @@ A local-only helper script was created at:
 C:\AzureCLIProfiles\AzureLocalAccreditation\Resume-AzureLocal.ps1
 ```
 
-The helper script is not stored in the public accreditation repository. It restores the dedicated Azure CLI profile, verifies both repositories, checks the pinned Microsoft commit, validates the Azure subscription context, verifies the resource group, and returns the working directory to the accreditation repository.
+The helper script is not stored in the public accreditation repository.
 
 ### Verified resume result
-
-The resume script completed successfully and confirmed:
 
 ```text
 Branch: main
@@ -298,15 +235,42 @@ Current Folder: C:\Projects\az-local-jumpbox-accreditation-lab
 
 ### Status
 
-**PASS.** The accreditation implementation can now be safely resumed after terminal closure, Cloud Shell disconnect, or laptop restart without relying on ephemeral PowerShell variables.
-
-### Change impact
-
-**Local workstation configuration only.** No additional Azure workload resources were created or modified by this resume setup.
+**PASS.** The accreditation implementation can be safely resumed after terminal closure or laptop restart without relying on ephemeral PowerShell variables.
 
 ---
 
-## 8. Current Activity 3 Implementation Status
+## 8. Verify Local Bicep CLI Readiness
+
+### What was done
+
+Bicep availability was checked from the isolated Azure CLI profile on the local VS Code workstation. The initial check confirmed that Bicep was not installed. Bicep was then installed through Azure CLI and re-verified.
+
+### Commands
+
+```powershell
+az bicep install
+az bicep version
+```
+
+### Verified result
+
+```text
+Bicep CLI version 0.46.1 (545b338e2c)
+```
+
+Bicep was installed into the dedicated accreditation Azure CLI profile path rather than the general Azure CLI profile.
+
+### Status
+
+**PASS.** Local Bicep CLI `0.46.1` is available for the official LocalBox Bicep deployment workflow.
+
+### Change impact
+
+**Local workstation configuration only.** No Azure resources were created or modified.
+
+---
+
+## 9. Current Activity 3 Implementation Status
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -320,6 +284,9 @@ Current Folder: C:\Projects\az-local-jumpbox-accreditation-lab
 | Final deployment parameter values locked | PASS |
 | Dedicated LocalBox resource group created | PASS |
 | Persistent local VS Code resume workflow | PASS |
+| Local Bicep CLI readiness | PASS |
+| Runtime source-reference validation | PENDING |
+| Exact remaining provider dependency validation | PENDING |
 | Billable LocalBox resource deployment | NOT STARTED |
 | Azure Local cluster deployment / review | NOT STARTED |
 | Azure Arc validation | NOT STARTED |
@@ -330,4 +297,4 @@ Current Folder: C:\Projects\az-local-jumpbox-accreditation-lab
 
 ## Next Required Step
 
-Prepare the secure Windows administrator password input and validate the final LocalBox deployment command without exposing the password in the public repository. The subsequent LocalBox deployment will create billable Azure resources, so cost and cleanup discipline must remain in effect.
+Before any billable LocalBox deployment, validate how the pinned template resolves runtime GitHub artifacts and identify the exact remaining Azure resource-provider dependencies required by the official LocalBox modules. This is a read-only predeployment validation step.
