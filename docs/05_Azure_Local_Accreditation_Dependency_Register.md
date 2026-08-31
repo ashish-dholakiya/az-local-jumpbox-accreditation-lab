@@ -22,7 +22,13 @@ Recommended message:
 
 ---
 
-## 2. Dependency Register
+## 2. Dependency Classification
+
+To avoid confusing Microsoft LocalBox implementation details with prerequisites required in this accreditation lab, dependencies are classified into three groups.
+
+### 2.1 Our Deployment Dependencies
+
+These are prerequisites that must exist or be validated in the accreditation environment before the LocalBox deployment can proceed safely.
 
 | Category | Dependency | Why it matters | Status |
 | --- | --- | --- | --- |
@@ -60,6 +66,46 @@ Recommended message:
 | Security | Secure Windows administrator password input | Mandatory LocalBox deployment parameter. The value must not be stored in the public repository, chat, or evidence screenshots. | PENDING |
 | Deployment | Final LocalBox deployment command validation | Required before billable LocalBox resources are created. | PENDING |
 | Deployment | LocalBox resource deployment | Creates the Azure Local Jumpstart LocalBox lab resources and begins billable workload deployment. | NOT STARTED |
+
+### 2.2 Microsoft LocalBox Solution Components
+
+These components are part of, or directly referenced by, the Microsoft LocalBox implementation. They should not automatically be described as separate accreditation prerequisites unless they require an explicit dependency action in our environment.
+
+| Microsoft LocalBox component | Role in the solution | How we use or treat it |
+| --- | --- | --- |
+| Microsoft `azure_arc` GitHub repository | Official source for Azure Arc Jumpstart LocalBox | Used as the authoritative Microsoft deployment source and pinned to a verified commit. |
+| Bicep templates | Define Azure resources for LocalBox | Used as the official deployment mechanism. |
+| PowerShell automation | Performs bootstrap, configuration, and supporting automation | Treated as Microsoft solution automation rather than separately reinvented scripts. |
+| Runtime GitHub artifacts | Scripts and supporting artifacts are retrieved through raw GitHub URLs | Runtime reference was validated against the exact pinned commit. |
+| Azure Compute | Provides the large Azure VM used to host the LocalBox environment | Subscription quota and supported VM SKU were validated before deployment. |
+| Azure Networking | Provides VNet, NIC, public IP, NAT, and related networking | `Microsoft.Network` was identified and registered before deployment. |
+| Azure Storage | Provides staging/storage resources used during deployment | Direct Bicep provider dependency validated. |
+| Log Analytics | Provides monitoring/log collection resources | `Microsoft.OperationalInsights` was identified and registered before deployment. |
+| Azure Local and Azure Arc integrations | Provide the Azure Local cluster and Azure management-plane experience required by the PoC | Required resource providers were validated as part of subscription readiness. |
+| Resource Bridge / extended location capabilities | Support Arc and Azure Local resource projection/integration | Supporting resource providers were validated before deployment. |
+
+### 2.3 Microsoft Validation and Engineering Controls
+
+The Microsoft repository also contains engineering and integration-testing controls used by Microsoft to validate LocalBox. These are useful implementation references, but they are not automatically dependencies of our accreditation deployment.
+
+| Microsoft validation control | Purpose in Microsoft engineering | Accreditation treatment |
+| --- | --- | --- |
+| Azure DevOps pipeline | Automates Microsoft LocalBox deployment and test execution | Reference only. We are not required to run Microsoft's internal pipeline to perform the accreditation PoC. |
+| `New-AzResourceGroupDeployment` with `TemplateParameterObject` | Microsoft pipeline deployment pattern for passing Bicep parameters | Used as a supported-pattern reference while designing our secure local deployment flow. |
+| Secure pipeline variable for Windows administrator password | Keeps the administrator password out of source code | Security pattern to follow. The actual password must remain runtime-only in our implementation. |
+| Pester integration tests | Automated validation of deployed LocalBox behavior | Microsoft engineering validation mechanism. Not classified as a mandatory accreditation dependency unless we explicitly decide to run equivalent tests. |
+| Automated teardown | Removes Microsoft test resource groups after validation or failure | Useful operational reference for cost control and cleanup, but not itself a prerequisite for deployment. |
+| Scheduled pipeline runs | Repeatedly validate current Microsoft LocalBox source | Microsoft CI practice, not a deployment requirement for our accreditation lab. |
+
+### Important distinction for presentation
+
+Do not present every Microsoft engineering component as a mandatory customer or accreditation dependency.
+
+Use this distinction:
+
+- **Our Deployment Dependencies:** what our environment must have before deployment.
+- **Microsoft LocalBox Solution Components:** what the LocalBox solution itself uses.
+- **Microsoft Validation and Engineering Controls:** how Microsoft validates and maintains the solution internally.
 
 ---
 
@@ -166,6 +212,8 @@ The following values must not be committed to the public accreditation repositor
 
 The Windows administrator password required by the LocalBox template remains a runtime-only secure input.
 
+The Microsoft LocalBox Bicep template marks the Windows administrator password as a secure parameter. Microsoft's own validation pipeline passes the value through a deployment parameter object rather than embedding the secret into the Bicep source. Our deployment method should preserve the same security objective even if the local execution mechanism differs from Microsoft's internal CI pipeline.
+
 ---
 
 ## 6. Current Dependency Readiness
@@ -188,7 +236,7 @@ The Windows administrator password required by the LocalBox template remains a r
 
 ### Pending before billable deployment
 
-1. Secure Windows administrator password input.
+1. Validate the local secure password-handling/deployment mechanism.
 2. Final LocalBox deployment command validation.
 
 ### Not started
@@ -210,7 +258,8 @@ The Windows administrator password required by the LocalBox template remains a r
 3. Cloud Shell is useful for quick checks, but a persistent local VS Code workflow is more suitable for an accreditation lab completed over multiple working sessions.
 4. Azure CLI context should be isolated when multiple Azure projects and accounts exist on the same workstation.
 5. Secrets must remain outside the public repository and presentation evidence.
-6. Turning hidden prerequisites into a dependency register makes implementation delays explainable as controlled risk reduction rather than unstructured troubleshooting.
+6. Microsoft solution components and Microsoft internal validation controls should not be incorrectly represented as customer-side mandatory dependencies.
+7. Turning hidden prerequisites into a dependency register makes implementation delays explainable as controlled risk reduction rather than unstructured troubleshooting.
 
 ---
 
@@ -226,6 +275,20 @@ This document must feed the accreditation presentation.
 - Isolated the accreditation Azure CLI profile from other Azure projects on the workstation.
 - Pinned the official Microsoft LocalBox source and validated runtime artifact reachability.
 
+### Suggested slide: Microsoft LocalBox Implementation Reference
+
+- Official LocalBox source is maintained in Microsoft's `azure_arc` repository.
+- LocalBox uses Bicep for infrastructure deployment and PowerShell for supporting automation.
+- Runtime scripts and artifacts can be retrieved from GitHub and therefore require source-reference control for repeatability.
+- Microsoft LocalBox integrates Azure Compute, Networking, Storage, Log Analytics, Azure Local, and Azure Arc-related services.
+
+### Suggested slide: Microsoft Validation vs Our Deployment Dependencies
+
+- Microsoft uses an Azure DevOps pipeline to automate LocalBox deployment and integration testing.
+- Microsoft's pipeline uses Azure PowerShell deployment commands and parameter objects, including secure handling of the administrator password.
+- Microsoft also uses Pester integration tests and automated teardown in its validation process.
+- These Microsoft engineering controls are useful implementation references, but they are not automatically mandatory dependencies of our accreditation PoC.
+
 ### Suggested slide: Dependency Register and Risk Reduction
 
 - Converted implementation prerequisites into a formal dependency register.
@@ -236,7 +299,7 @@ This document must feed the accreditation presentation.
 ### Suggested slide: Current Build Readiness
 
 - Subscription, access, region, quota, tooling, source, runtime references, and direct provider dependencies: **Ready**.
-- Pending before deployment: secure password input and final deployment command validation.
+- Pending before deployment: secure password handling and final deployment command validation.
 - LocalBox workload deployment: **Not Started**.
 
 ---
