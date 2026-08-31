@@ -111,8 +111,6 @@ Verified relevant deployment parameters include:
 
 The official template supports `Standard_E32s_v6` and includes `centralindia` as an allowed Azure Local instance location.
 
-The planned lab configuration continues to use Central India, subject to final parameter validation before resource creation.
-
 ### Status
 
 **PASS.** Required parameter structure has been identified from the pinned official template.
@@ -162,7 +160,61 @@ The actual Tenant ID and Azure Local Resource Provider object ID are intentional
 
 ---
 
-## 5. Current Activity 3 Implementation Status
+## 5. Lock LocalBox Deployment Parameters
+
+### What was done
+
+The deployment configuration was defined and printed in Azure Cloud Shell before any Azure workload resources were created.
+
+### Verified configuration
+
+| Parameter | Locked value | Reason |
+| --- | --- | --- |
+| Resource group | `rg-azlocal-localbox-accreditation-ci` | Dedicated accreditation lab boundary and easy cleanup. |
+| `location` | `centralindia` | Keeps supporting Azure resources in the selected lab region. |
+| `azureLocalInstanceLocation` | `centralindia` | Registers the Azure Local instance in the same selected region and is allowed by the pinned LocalBox template. |
+| `vmSize` | `Standard_E32s_v6` | Supported by the pinned LocalBox template and previously validated for Central India quota and availability. |
+| `windowsAdminUsername` | `arcdemo` | Uses the LocalBox reference username. |
+| `deployBastion` | `false` | Avoids an additional service unless the required lab outcome later depends on it. |
+| `autoDeployClusterResource` | `true` | Supports the required Activity 3 Azure Local cluster deployment / review outcome. |
+| `autoUpgradeClusterResource` | `false` | Cluster deployment will be validated before any optional upgrade workflow is introduced. |
+| `enableAzureSpotPricing` | `false` | Avoids Spot eviction risk during an accreditation lab. |
+| `vmAutologon` | `true` | Retains the LocalBox lab automation behavior. |
+| `governResourceTags` | `false` | The template states its special CostControl and SecurityControl tags are intended for Microsoft-internal Azure lab tenants; they are not assumed for this company subscription. |
+
+### Verification output
+
+The Cloud Shell output confirmed the values above, including:
+
+```text
+Resource Group: rg-azlocal-localbox-accreditation-ci
+Azure Resource Location: centralindia
+Azure Local Instance Location: centralindia
+VM Size: Standard_E32s_v6
+Windows Admin Username: arcdemo
+Deploy Bastion: False
+Auto Deploy Cluster: True
+Auto Upgrade Cluster: False
+Spot Pricing: False
+VM Autologon: True
+Govern Resource Tags: False
+```
+
+### Security note
+
+The Windows administrator password is not stored in this public repository and was intentionally excluded from this parameter-lock evidence. It will be supplied securely at deployment time.
+
+### Status
+
+**PASS.** Final non-secret LocalBox deployment parameter values are locked and verified.
+
+### Change impact
+
+**Local Cloud Shell preparation only.** No Azure workload resources were created or modified.
+
+---
+
+## 6. Current Activity 3 Implementation Status
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -173,7 +225,7 @@ The actual Tenant ID and Azure Local Resource Provider object ID are intentional
 | Required template parameter structure reviewed | PASS |
 | Tenant ID input retrieved | PASS |
 | Azure Local RP object ID retrieved | PASS |
-| Final deployment parameter values locked | PENDING |
+| Final deployment parameter values locked | PASS |
 | Billable LocalBox resource deployment | NOT STARTED |
 | Azure Local cluster deployment / review | NOT STARTED |
 | Azure Arc validation | NOT STARTED |
@@ -184,4 +236,4 @@ The actual Tenant ID and Azure Local Resource Provider object ID are intentional
 
 ## Next Required Step
 
-Before any billable Azure resource is created, lock and validate the exact LocalBox deployment parameter values. This includes the Azure resource location, Azure Local instance location, VM size, administrator username, secure password handling, Bastion decision, cluster auto-deployment setting and cost-related options.
+Create the dedicated Azure resource group in Central India and verify it. This will be the first Azure-side change for the LocalBox implementation. The subsequent LocalBox deployment will create billable Azure resources, so cost and cleanup discipline must remain in effect.
