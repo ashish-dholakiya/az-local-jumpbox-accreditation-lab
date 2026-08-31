@@ -270,7 +270,65 @@ Bicep was installed into the dedicated accreditation Azure CLI profile path rath
 
 ---
 
-## 9. Current Activity 3 Implementation Status
+## 9. Validate Runtime Source Pinning and Direct Provider Dependencies
+
+### What was done
+
+The pinned LocalBox source was scanned to identify runtime GitHub references and direct Azure resource-provider namespaces used by the Bicep modules.
+
+The scan confirmed that `githubBranch` is used to build a `raw.githubusercontent.com` runtime artifact base URL and defaults to `main` in the official template. A direct HTTP test was then performed using the exact verified Microsoft commit SHA in place of the branch name.
+
+### Verified runtime source result
+
+```text
+Pinned runtime artifact reachable: True
+HTTP Status: 200
+```
+
+This confirms that the exact commit SHA can resolve the tested LocalBox runtime artifact. The deployment configuration can therefore use:
+
+```text
+githubBranch = 3f433866757688d926ae6707e9c0041d8e640b82
+```
+
+instead of a moving `main` reference, without modifying Microsoft source code.
+
+### Direct Bicep provider namespaces discovered
+
+```text
+Microsoft.Authorization
+Microsoft.Compute
+Microsoft.Network
+Microsoft.OperationalInsights
+Microsoft.Resources
+Microsoft.Storage
+```
+
+### Verified provider registration state
+
+```text
+Microsoft.Authorization : Registered
+Microsoft.Compute : Registered
+Microsoft.Network : NotRegistered
+Microsoft.OperationalInsights : NotRegistered
+Microsoft.Resources : Registered
+Microsoft.Storage : Registered
+```
+
+### Status
+
+**PARTIAL PASS.** Runtime commit pinning is validated. Four directly referenced providers are already registered. Two directly referenced providers remain unregistered and must be registered before billable LocalBox deployment:
+
+- `Microsoft.Network`
+- `Microsoft.OperationalInsights`
+
+### Change impact
+
+**Read-only validation only.** No provider registrations or Azure workload resources were changed by this step.
+
+---
+
+## 10. Current Activity 3 Implementation Status
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -285,8 +343,11 @@ Bicep was installed into the dedicated accreditation Azure CLI profile path rath
 | Dedicated LocalBox resource group created | PASS |
 | Persistent local VS Code resume workflow | PASS |
 | Local Bicep CLI readiness | PASS |
-| Runtime source-reference validation | PENDING |
-| Exact remaining provider dependency validation | PENDING |
+| Runtime source-reference validation | PASS |
+| Runtime artifact exact-commit reachability | PASS |
+| Direct provider dependency discovery | PASS |
+| Microsoft.Network registration | PENDING |
+| Microsoft.OperationalInsights registration | PENDING |
 | Billable LocalBox resource deployment | NOT STARTED |
 | Azure Local cluster deployment / review | NOT STARTED |
 | Azure Arc validation | NOT STARTED |
@@ -297,4 +358,4 @@ Bicep was installed into the dedicated accreditation Azure CLI profile path rath
 
 ## Next Required Step
 
-Before any billable LocalBox deployment, validate how the pinned template resolves runtime GitHub artifacts and identify the exact remaining Azure resource-provider dependencies required by the official LocalBox modules. This is a read-only predeployment validation step.
+Register only the two directly required providers that are currently unregistered, `Microsoft.Network` and `Microsoft.OperationalInsights`, then verify both reach `Registered`. After that, re-synchronize the local accreditation repository and continue to final secure parameter preparation and predeployment validation.
