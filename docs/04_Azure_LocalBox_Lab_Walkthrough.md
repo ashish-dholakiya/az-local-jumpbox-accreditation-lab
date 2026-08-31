@@ -163,7 +163,7 @@ The actual Tenant ID and Azure Local Resource Provider object ID are intentional
 
 ### Security note
 
-The Windows administrator password is not stored in this public repository. It will be supplied securely at deployment time.
+The Windows administrator password is not stored in this public repository. It is supplied only at runtime.
 
 ### Status
 
@@ -239,34 +239,32 @@ Current Folder: C:\Projects\az-local-jumpbox-accreditation-lab
 
 ---
 
-## 8. Verify Local Bicep CLI Readiness
+## 8. Verify Local Deployment Tooling Readiness
 
 ### What was done
 
-Bicep availability was checked from the isolated Azure CLI profile on the local VS Code workstation. The initial check confirmed that Bicep was not installed. Bicep was then installed through Azure CLI and re-verified.
+The local deployment tooling required for the official LocalBox Bicep workflow was verified.
 
-### Commands
-
-```powershell
-az bicep install
-az bicep version
-```
-
-### Verified result
+Verified components:
 
 ```text
-Bicep CLI version 0.46.1 (545b338e2c)
+Azure CLI 2.89.1
+Bicep CLI 0.46.1
+Az.Resources 10.1.0
+Az.Accounts 5.5.2
 ```
 
-Bicep was installed into the dedicated accreditation Azure CLI profile path rather than the general Azure CLI profile.
+The Azure CLI-managed Bicep executable was added to the current PowerShell process PATH so Azure PowerShell could invoke Bicep during template validation.
+
+Azure PowerShell authentication was also completed and the active context was verified against the correct accreditation subscription. Sensitive account and tenant identifiers are intentionally not stored in this public repository.
 
 ### Status
 
-**PASS.** Local Bicep CLI `0.46.1` is available for the official LocalBox Bicep deployment workflow.
+**PASS.** Local Azure CLI, Bicep, Azure PowerShell deployment cmdlets, and the correct Azure PowerShell subscription context are ready.
 
 ### Change impact
 
-**Local workstation configuration only.** No Azure resources were created or modified.
+Local workstation configuration and authentication context only. No Azure workload resources were created.
 
 ---
 
@@ -285,13 +283,13 @@ Pinned runtime artifact reachable: True
 HTTP Status: 200
 ```
 
-This confirms that the exact commit SHA can resolve the tested LocalBox runtime artifact. The deployment configuration can therefore use:
+The deployment configuration therefore uses:
 
 ```text
 githubBranch = 3f433866757688d926ae6707e9c0041d8e640b82
 ```
 
-instead of a moving `main` reference, without modifying Microsoft source code.
+instead of a moving `main` reference.
 
 ### Direct Bicep provider namespaces discovered
 
@@ -319,7 +317,7 @@ Microsoft.Storage : Registered
 
 ### Status
 
-**PASS.** Runtime exact-commit artifact reachability is validated and all directly referenced provider namespaces are now registered.
+**PASS.** Runtime exact-commit artifact reachability is validated and all directly referenced provider namespaces are registered.
 
 ### Change impact
 
@@ -327,7 +325,50 @@ Microsoft.Storage : Registered
 
 ---
 
-## 10. Current Activity 3 Implementation Status
+## 10. Validate Secure Runtime Inputs and Final ARM Deployment Request
+
+### What was done
+
+The LocalBox Windows administrator password was captured through a PowerShell secure prompt and verified as a `System.Security.SecureString` without displaying the secret.
+
+The mandatory tenant and Azure Local resource-provider object ID values were retrieved in the authenticated Azure PowerShell session and validated only as present. Their actual values were not recorded in public evidence.
+
+The complete LocalBox parameter set was then assembled using the locked deployment configuration, including the exact Microsoft commit for `githubBranch`.
+
+Azure PowerShell `Test-AzResourceGroupDeployment` was used to perform an ARM predeployment validation against the dedicated accreditation resource group.
+
+Because the cmdlet could not serialize a `SecureString` inside `TemplateParameterObject`, the password was converted only transiently in PowerShell process memory for the validation request. The temporary plaintext variable/reference was removed immediately afterward. The password was never printed, written to a file, or committed to GitHub.
+
+### Verified result
+
+```text
+LocalBox ARM validation: PASS
+Temporary plaintext password reference cleared.
+```
+
+Azure returned one diagnostic warning:
+
+```text
+NestedDeploymentShortCircuited
+```
+
+The warning applied to the nested `hostVmDeployment`. Inspection of the pinned Microsoft `main.bicep` confirmed that this host module consumes outputs from earlier modules, including the staging storage account name and network subnet ID. Those values are deployment-time outputs and cannot be fully evaluated during this validation request.
+
+The warning therefore represents an ARM nested-deployment validation limitation, not a detected template syntax error, provider-registration failure, password error, or missing LocalBox input.
+
+### Status
+
+**PASS WITH DOCUMENTED VALIDATION LIMITATION.** The top-level LocalBox ARM deployment request and supplied parameters passed validation. The nested host deployment could not be fully prevalidated because it depends on deployment-time module outputs.
+
+This must not be represented as full execution validation of all host resources. Actual host resource creation remains untested until the billable LocalBox deployment is performed.
+
+### Change impact
+
+**Validation only.** No LocalBox VM, network, storage, Log Analytics, Azure Local cluster, or other billable workload resource was created by this step.
+
+---
+
+## 11. Current Activity 3 Implementation Status
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -342,12 +383,15 @@ Microsoft.Storage : Registered
 | Dedicated LocalBox resource group created | PASS |
 | Persistent local VS Code resume workflow | PASS |
 | Local Bicep CLI readiness | PASS |
+| Azure PowerShell deployment tooling | PASS |
+| Azure PowerShell subscription context | PASS |
 | Runtime source-reference validation | PASS |
 | Runtime artifact exact-commit reachability | PASS |
 | Direct provider dependency discovery | PASS |
 | Microsoft.Network registration | PASS |
 | Microsoft.OperationalInsights registration | PASS |
-| Final predeployment validation | PENDING |
+| Secure runtime password input | PASS |
+| Final ARM predeployment validation | PASS WITH DOCUMENTED LIMITATION |
 | Billable LocalBox resource deployment | NOT STARTED |
 | Azure Local cluster deployment / review | NOT STARTED |
 | Azure Arc validation | NOT STARTED |
@@ -358,4 +402,6 @@ Microsoft.Storage : Registered
 
 ## Next Required Step
 
-Re-synchronize the local accreditation repository, then perform final predeployment validation of the exact LocalBox parameters and deployment command without creating billable resources. Only after that validation passes should the billable LocalBox deployment be started.
+The predeployment readiness gate is complete. The next implementation action is the billable LocalBox deployment using the validated parameter set and the exact pinned Microsoft runtime source reference.
+
+Before starting that deployment, explicitly confirm the cost impact and deployment window. Once deployment begins, monitor the Azure resource-group deployment and preserve sanitized evidence of the deployment result.
