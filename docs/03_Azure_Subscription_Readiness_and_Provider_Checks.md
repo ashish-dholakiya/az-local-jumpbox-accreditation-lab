@@ -334,9 +334,28 @@ az version
 az bicep version
 ```
 
+### Verified result
+
+```text
+Azure CLI: 2.89.1
+Bicep CLI: 0.46.1
+```
+
+Bicep was not initially present in the Cloud Shell session. It was installed with:
+
+```powershell
+az bicep install
+```
+
+The installation completed successfully and `az bicep version` returned Bicep CLI version `0.46.1`.
+
+### Readiness status
+
+**PASS.** Azure CLI and Bicep tooling required for the LocalBox deployment workflow are available.
+
 ### Change impact
 
-**Read-only.** No Azure resource is changed.
+`az version` and `az bicep version` are **read-only**. `az bicep install` changes only the Cloud Shell / Azure CLI client tooling and does not create or modify Azure workload resources.
 
 ---
 
@@ -369,8 +388,8 @@ The repository is public. Full subscription IDs, credentials, secrets and intern
 | Target region selected: Central India | PASS |
 | Central India compute quota | PASS |
 | `Standard_E32s_v6` availability | PASS |
-| Azure CLI readiness | PENDING |
-| Bicep readiness | PENDING |
+| Azure CLI readiness | PASS |
+| Bicep readiness | PASS |
 | Final LocalBox deployment decision | PENDING |
 
-The next implementation step is to validate **Azure CLI and Bicep readiness**, followed by the final LocalBox pre-deployment GO / NO-GO review before any billable lab resources are created.
+All subscription, permission, provider, region, quota, SKU and client-tooling readiness checks completed so far are **PASS**. The next implementation step is the final LocalBox pre-deployment GO / NO-GO review before any billable lab resources are created.
