@@ -256,7 +256,57 @@ rg-azlocal-localbox-accreditation-ci  centralindia  Succeeded
 
 ---
 
-## 7. Current Activity 3 Implementation Status
+## 7. Establish Persistent Local VS Code Resume Workflow
+
+### What was done
+
+The accreditation workflow was moved from an ephemeral Cloud Shell session to a persistent local VS Code PowerShell workflow on the personal laptop.
+
+The following were verified locally:
+
+- Git `2.55.0`.
+- PowerShell `7.6.5`.
+- Azure CLI `2.89.1`.
+- Accreditation repository cloned to `C:\Projects\az-local-jumpbox-accreditation-lab` on branch `main` with a clean working tree.
+- Official Microsoft `azure_arc` repository cloned separately to `C:\Projects\azure_arc`.
+- Microsoft source pinned to `3f433866757688d926ae6707e9c0041d8e640b82` with a clean detached HEAD.
+- Dedicated Azure CLI profile path configured as `C:\AzureCLIProfiles\AzureLocalAccreditation` so this accreditation login context remains isolated from other Azure projects on the same laptop.
+- Correct accreditation subscription was authenticated and selected in the isolated Azure CLI profile.
+- Existing accreditation resource group was visible from the local VS Code session with provisioning state `Succeeded`.
+
+A local-only helper script was created at:
+
+```text
+C:\AzureCLIProfiles\AzureLocalAccreditation\Resume-AzureLocal.ps1
+```
+
+The helper script is not stored in the public accreditation repository. It restores the dedicated Azure CLI profile, verifies both repositories, checks the pinned Microsoft commit, validates the Azure subscription context, verifies the resource group, and returns the working directory to the accreditation repository.
+
+### Verified resume result
+
+The resume script completed successfully and confirmed:
+
+```text
+Branch: main
+Pinned Commit Match: True
+Azure subscription state: Enabled
+Azure subscription default context: True
+Resource group location: centralindia
+Resource group provisioning state: Succeeded
+Current Folder: C:\Projects\az-local-jumpbox-accreditation-lab
+```
+
+### Status
+
+**PASS.** The accreditation implementation can now be safely resumed after terminal closure, Cloud Shell disconnect, or laptop restart without relying on ephemeral PowerShell variables.
+
+### Change impact
+
+**Local workstation configuration only.** No additional Azure workload resources were created or modified by this resume setup.
+
+---
+
+## 8. Current Activity 3 Implementation Status
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -269,6 +319,7 @@ rg-azlocal-localbox-accreditation-ci  centralindia  Succeeded
 | Azure Local RP object ID retrieved | PASS |
 | Final deployment parameter values locked | PASS |
 | Dedicated LocalBox resource group created | PASS |
+| Persistent local VS Code resume workflow | PASS |
 | Billable LocalBox resource deployment | NOT STARTED |
 | Azure Local cluster deployment / review | NOT STARTED |
 | Azure Arc validation | NOT STARTED |
