@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisioDocument xmlns="http://schemas.microsoft.com/visio/2003/core"
+ xmlns:vx="http://schemas.microsoft.com/visio/2006/extension"
+ xmlns:v14="http://schemas.microsoft.com/office/visio/2010/extension">
+  <DocumentProperties>
+    <Creator>OpenAI</Creator>
+    <Title>Contoso Azure Local High-Level Architecture</Title>
+  </DocumentProperties>
+  <Fonts>
+    <FontEntry ID="0" Name="Segoe UI" CharSet="0" PitchAndFamily="2"/>
+  </Fonts>
+  <Pages>
+    <Page ID="0" NameU="Page-1" Name="Page-1">
+      <PageSheet>
+        <PageProps>
+          <PageWidth>16.0</PageWidth>
+          <PageHeight>9.0</PageHeight>
+          <PageScale>1</PageScale>
+          <DrawingScale>1</DrawingScale>
+          <DrawingSizeType>0</DrawingSizeType>
+          <DrawingScaleType>0</DrawingScaleType>
+        </PageProps>
+      </PageSheet>
+      <Shapes>
+        
+    <Shape ID="1" NameU="Title" Type="Shape">
+      <XForm>
+        <PinX>5.5500</PinX><PinY>8.6250</PinY>
+        <Width>10.5000</Width><Height>0.4500</Height>
+        <LocPinX>5.2500</LocPinX><LocPinY>0.2250</LocPinY>
+        <Angle>0</Angle>
+      </XForm>
+      <Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill>
+      <Line><LineColor>#FFFFFF</LineColor><LineWeight>0.012</LineWeight></Line>
+      <Char IX="0"><Font>0</Font><Size>0.2500</Size><Color>#17365D</Color></Char>
+      <Para IX="0"><HorzAlign>1</HorzAlign></Para>
+      <Text>Contoso – Azure Local High-Level Architecture</Text>
+    </Shape>
+    <Shape ID="2" NameU="Subtitle" Type="Shape">
+      <XForm>
+        <PinX>4.3000</PinX><PinY>8.2800</PinY>
+        <Width>8.0000</Width><Height>0.2800</Height>
+        <LocPinX>4.0000</LocPinX><LocPinY>0.1400</LocPinY>
+        <Angle>0</Angle>
+      </XForm>
+      <Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill>
+      <Line><LineColor>#FFFFFF</LineColor><LineWeight>0.012</LineWeight></Line>
+      <Char IX="0"><Font>0</Font><Size>0.1528</Size><Color>#17365D</Color></Char>
+      <Para IX="0"><HorzAlign>1</HorzAlign></Para>
+      <Text>Hybrid • Secure • Resilient • Manageable</Text>
+    </Shape>
+    <Shape ID="3" NameU="Solution Flow" Type="Shape">
+      <XForm>
+        <PinX>8.0000</PinX><PinY>7.3250</PinY>
+        <Width>15.3000</Width><Height>1.3500</Height>
+        <LocPinX>7.6500</LocPinX><LocPinY>0.6750</LocPinY>
+        <Angle>0</Angle>
+      </XForm>
+      <Fill><FillForegnd>#F8FBFF</FillForegnd><FillPattern>1</FillPattern></Fill>
+      <Line><LineColor>#0078D4</LineColor><LineWeight>0.012</LineWeight></Line>
+      <Char IX="0"><Font>0</Font><Size>0.1528</Size><Color>#17365D</Color></Char>
+      <Para IX="0"><HorzAlign>1</HorzAlign></Para>
+      <Text>Solution Flow – How the Solution Comes Together</Text>
+    </Shape>
+    <Shape ID="4" NameU="1  Assess Customer Environment" Type="Shape"><XForm><PinX>1.8250</PinX><PinY>7.2500</PinY><Width>2.4500</Width><Height>0.6000</Height><LocPinX>1.2250</LocPinX><LocPinY>0.3000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#2B579A</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>1  Assess Customer Environment</Text></Shape>
+    <Shape ID="5" NameU="2  Deploy Azure Local at Core Sites" Type="Shape"><XForm><PinX>4.7250</PinX><PinY>7.2500</PinY><Width>2.4500</Width><Height>0.6000</Height><LocPinX>1.2250</LocPinX><LocPinY>0.3000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#2B579A</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>2  Deploy Azure Local at Core Sites</Text></Shape>
+    <Shape ID="6" NameU="3  Connect to Azure Arc and Azure Services" Type="Shape"><XForm><PinX>7.6250</PinX><PinY>7.2500</PinY><Width>2.4500</Width><Height>0.6000</Height><LocPinX>1.2250</LocPinX><LocPinY>0.3000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#2B579A</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>3  Connect to Azure Arc and Azure Services</Text></Shape>
+    <Shape ID="7" NameU="4  Secure, Monitor, Backup and Govern" Type="Shape"><XForm><PinX>10.5250</PinX><PinY>7.2500</PinY><Width>2.4500</Width><Height>0.6000</Height><LocPinX>1.2250</LocPinX><LocPinY>0.3000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#2B579A</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>4  Secure, Monitor, Backup and Govern</Text></Shape>
+    <Shape ID="8" NameU="5  Migrate, Operate and Scale" Type="Shape"><XForm><PinX>13.4250</PinX><PinY>7.2500</PinY><Width>2.4500</Width><Height>0.6000</Height><LocPinX>1.2250</LocPinX><LocPinY>0.3000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#2B579A</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>5  Migrate, Operate and Scale</Text></Shape>
+    <Shape ID="9" NameU="Azure Region" Type="Shape"><XForm><PinX>1.9500</PinX><PinY>3.9000</PinY><Width>3.2000</Width><Height>4.8000</Height><LocPinX>1.6000</LocPinX><LocPinY>2.4000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#F7FBFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#0078D4</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1528</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Azure Region (Microsoft Cloud)</Text></Shape>
+    <Shape ID="10" NameU="Management" Type="Shape"><XForm><PinX>1.9500</PinX><PinY>5.3250</PinY><Width>2.8000</Width><Height>0.9500</Height><LocPinX>1.4000</LocPinX><LocPinY>0.4750</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Management &amp; Governance&#10;Azure Portal | Azure Policy&#10;Azure Monitor | Log Analytics</Text></Shape>
+    <Shape ID="11" NameU="Identity" Type="Shape"><XForm><PinX>1.9500</PinX><PinY>4.3000</PinY><Width>2.8000</Width><Height>0.9000</Height><LocPinX>1.4000</LocPinX><LocPinY>0.4500</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Identity &amp; Access&#10;Microsoft Entra ID&#10;Conditional Access | RBAC</Text></Shape>
+    <Shape ID="12" NameU="Azure Services" Type="Shape"><XForm><PinX>1.9500</PinX><PinY>3.1250</PinY><Width>2.8000</Width><Height>1.2500</Height><LocPinX>1.4000</LocPinX><LocPinY>0.6250</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Core Azure Services&#10;Azure Backup | Azure Site Recovery&#10;Azure Update Manager | Key Vault</Text></Shape>
+    <Shape ID="13" NameU="Connectivity" Type="Shape"><XForm><PinX>1.9500</PinX><PinY>2.0250</PinY><Width>2.8000</Width><Height>0.6500</Height><LocPinX>1.4000</LocPinX><LocPinY>0.3250</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Networking&#10;ExpressRoute / VPN</Text></Shape>
+    <Shape ID="14" NameU="Primary Site" Type="Shape"><XForm><PinX>7.2500</PinX><PinY>3.8500</PinY><Width>6.1000</Width><Height>4.1000</Height><LocPinX>3.0500</LocPinX><LocPinY>2.0500</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FAFCFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#2B579A</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1528</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Contoso Head Office / Primary Site</Text></Shape>
+    <Shape ID="15" NameU="Arc" Type="Shape"><XForm><PinX>7.2500</PinX><PinY>5.0750</PinY><Width>5.5000</Width><Height>0.6500</Height><LocPinX>2.7500</LocPinX><LocPinY>0.3250</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1250</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Azure Arc&#10;Arc-enabled servers | Arc for Azure Local | Arc Network</Text></Shape>
+    <Shape ID="16" NameU="Compute" Type="Shape"><XForm><PinX>5.3500</PinX><PinY>3.9500</PinY><Width>1.7000</Width><Height>1.2000</Height><LocPinX>0.8500</LocPinX><LocPinY>0.6000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Compute&#10;Azure Local cluster&#10;Virtual Machines&#10;Windows / Linux</Text></Shape>
+    <Shape ID="17" NameU="Storage" Type="Shape"><XForm><PinX>7.2500</PinX><PinY>3.9500</PinY><Width>1.7000</Width><Height>1.2000</Height><LocPinX>0.8500</LocPinX><LocPinY>0.6000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Storage&#10;Storage Spaces Direct&#10;Performance tiers&#10;Data protection</Text></Shape>
+    <Shape ID="18" NameU="Networking" Type="Shape"><XForm><PinX>9.1500</PinX><PinY>3.9500</PinY><Width>1.7000</Width><Height>1.2000</Height><LocPinX>0.8500</LocPinX><LocPinY>0.6000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Networking&#10;Virtual Switch&#10;VLAN segmentation&#10;Firewall / NSGs</Text></Shape>
+    <Shape ID="19" NameU="Security" Type="Shape"><XForm><PinX>5.8250</PinX><PinY>2.6750</PinY><Width>2.6500</Width><Height>0.9500</Height><LocPinX>1.3250</LocPinX><LocPinY>0.4750</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Security&#10;Defender for Cloud | Encryption&#10;Secure Boot | TPM | RBAC</Text></Shape>
+    <Shape ID="20" NameU="Backup Local" Type="Shape"><XForm><PinX>8.6750</PinX><PinY>2.6750</PinY><Width>2.6500</Width><Height>0.9500</Height><LocPinX>1.3250</LocPinX><LocPinY>0.4750</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#8AB4F8</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Backup (Local)&#10;Integrated / Azure Backup Server&#10;Short-term operational recovery</Text></Shape>
+    <Shape ID="21" NameU="Remote Sites" Type="Shape"><XForm><PinX>12.3000</PinX><PinY>3.8500</PinY><Width>3.0000</Width><Height>4.1000</Height><LocPinX>1.5000</LocPinX><LocPinY>2.0500</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FBFFF9</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#4CAF50</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1389</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Branch / Remote Sites&#10;(site count and placement to be confirmed)</Text></Shape>
+    <Shape ID="22" NameU="Remote Azure Local" Type="Shape"><XForm><PinX>12.3000</PinX><PinY>4.2000</PinY><Width>2.4000</Width><Height>1.8000</Height><LocPinX>1.2000</LocPinX><LocPinY>0.9000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#9CCC65</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Azure Local&#10;Potential local workloads:&#10;Manufacturing / edge apps&#10;File and print&#10;Site services&#10;Low-latency workloads</Text></Shape>
+    <Shape ID="23" NameU="Remote Networking" Type="Shape"><XForm><PinX>11.6500</PinX><PinY>2.7000</PinY><Width>1.1000</Width><Height>0.8000</Height><LocPinX>0.5500</LocPinX><LocPinY>0.4000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#9CCC65</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.0972</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Local&#10;Networking&#10;SD-WAN/VPN&#10;Firewall</Text></Shape>
+    <Shape ID="24" NameU="Remote Backup" Type="Shape"><XForm><PinX>12.9500</PinX><PinY>2.7000</PinY><Width>1.1000</Width><Height>0.8000</Height><LocPinX>0.5500</LocPinX><LocPinY>0.4000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FFFFFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#9CCC65</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.0972</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Backup&#10;Local / Azure&#10;integration</Text></Shape>
+    <Shape ID="25" NameU="Backup Strategy" Type="Shape"><XForm><PinX>5.7000</PinX><PinY>0.9500</PinY><Width>3.0000</Width><Height>1.0000</Height><LocPinX>1.5000</LocPinX><LocPinY>0.5000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FCFAFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#7E57C2</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Backup Strategy&#10;3-2-1 principle&#10;Local recovery + off-site copy&#10;Retention by workload policy</Text></Shape>
+    <Shape ID="26" NameU="DR Strategy" Type="Shape"><XForm><PinX>9.4000</PinX><PinY>0.9500</PinY><Width>4.0000</Width><Height>1.0000</Height><LocPinX>2.0000</LocPinX><LocPinY>0.5000</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FCFAFF</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#7E57C2</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.1111</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Disaster Recovery Strategy&#10;Critical workloads: site-level DR&#10;Azure / secondary site subject to discovery&#10;RPO/RTO agreed per workload</Text></Shape>
+    <Shape ID="27" NameU="Key Items" Type="Shape"><XForm><PinX>14.8250</PinX><PinY>3.3750</PinY><Width>1.6500</Width><Height>5.8500</Height><LocPinX>0.8250</LocPinX><LocPinY>2.9250</LocPinY><Angle>0</Angle></XForm><Fill><FillForegnd>#FAFAFA</FillForegnd><FillPattern>1</FillPattern></Fill><Line><LineColor>#B0B0B0</LineColor><LineWeight>0.012</LineWeight></Line><Char IX="0"><Font>0</Font><Size>0.0972</Size><Color>#17365D</Color></Char><Para IX="0"><HorzAlign>1</HorzAlign></Para><Text>Key Items&#10;&#10;To confirm:&#10;• Site inventory&#10;• Workload sizing&#10;• RPO/RTO&#10;• Network capacity&#10;• Hardware model&#10;• DR topology&#10;&#10;Principles:&#10;• HA by design&#10;• Least privilege&#10;• Central governance&#10;• Local resilience&#10;• Scalable operations</Text></Shape>
+      </Shapes>
+    </Page>
+  </Pages>
+</VisioDocument>
