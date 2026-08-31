@@ -2,90 +2,124 @@
 
 ## Purpose
 
-This document records the commands used to validate whether the Azure subscription is ready for the Azure Local Jumpstart / LocalBox lab.
+This document records the commands used to prepare and validate the Azure subscription for the Azure Local Jumpstart / LocalBox accreditation lab.
 
-The checks are intentionally separated from the deployment steps so that subscription issues can be identified before resources are created. Most commands in this document are read-only unless explicitly marked otherwise.
+The checks are kept separate from the deployment steps so that subscription, permissions, provider registration, region and quota issues can be identified before any billable lab resources are created.
 
-> **Lab subscription name:** `AD_Test_Platform`
+> **Active lab subscription:** `ME-MngEnvMCAP085303-v-dholakiyaa-1`
 >
-> The subscription ID is intentionally not stored in this public repository. Use the correct subscription ID from your secure local notes or Azure portal when running the commands.
+> **Target Azure region:** `Central India`
+>
+> The subscription ID is intentionally not stored in this public repository. Commands read it dynamically from the active Azure CLI context.
 
 ---
 
-## 1. Confirm the Active Azure Account
+## 1. List Available Azure Subscriptions
 
 ### What this command does
 
-Displays the Azure account and subscription that Azure CLI is currently using.
+Lists the Azure subscriptions available to the signed-in identity.
 
 ### Why we run it
 
-Before running any subscription-level check, we need to make sure Azure CLI is authenticated with the expected tenant and subscription.
+This is the first safety check. It confirms that Azure CLI is using the intended company-provided subscription before any provider registration or deployment activity begins.
 
 ### Command
 
 ```powershell
-az account show -o table
+az account list `
+    --query "[].{Name:name,SubscriptionId:id,State:state,IsDefault:isDefault}" `
+    -o table
 ```
 
 ### Expected result
 
-The output should show the intended account and subscription. For this lab, the subscription name should be:
+The active lab subscription should appear as:
 
 ```text
-AD_Test_Platform
+ME-MngEnvMCAP085303-v-dholakiyaa-1
 ```
+
+The subscription state should be `Enabled`.
 
 ### Change impact
 
-**Read-only.** This command does not change any Azure resource.
+**Read-only.** No Azure resource is changed.
 
 ---
 
-## 2. Select the Lab Subscription
+## 2. Confirm the Active Subscription
 
 ### What this command does
 
-Sets the Azure CLI context to the subscription that will be used for the lab.
+Displays the Azure subscription currently selected by Azure CLI.
 
 ### Why we run it
 
-Azure CLI can have access to several subscriptions. Explicitly selecting the lab subscription helps prevent checks or deployments from running in the wrong subscription.
+Even when only one subscription is visible, we explicitly verify the active context before continuing.
 
 ### Command
 
 ```powershell
-$subscriptionId = "<your-subscription-id>"
-az account set --subscription $subscriptionId
-```
-
-### Validation
-
-Run:
-
-```powershell
-az account show --query "{Subscription:name, SubscriptionId:id, Tenant:tenantId, State:state}" -o table
+az account show `
+    --query "{Name:name,SubscriptionId:id,State:state,IsDefault:isDefault}" `
+    -o table
 ```
 
 ### Expected result
 
-The subscription should be `AD_Test_Platform` and the state should be `Enabled`.
+The subscription name should be `ME-MngEnvMCAP085303-v-dholakiyaa-1` and the state should be `Enabled`.
 
 ### Change impact
 
-`az account set` changes only the local Azure CLI context. It does not modify Azure resources.
+**Read-only.** No Azure resource is changed.
 
 ---
 
-## 3. Check Azure Local and Azure Arc Resource Providers
+## 3. Check Effective RBAC Access
 
 ### What this check does
 
-Reads the registration state of the Azure resource providers commonly used by Azure Local, Azure Arc, Azure Local VM management, monitoring, governance and optional Kubernetes services.
+Finds the effective Azure RBAC assignments for the signed-in user, including roles inherited from a management group and roles granted through group membership.
 
 ### Why we run it
 
-Azure Local is not supported by a single Azure resource provider. Different capabilities depend on different providers. Checking them before deployment helps identify missing prerequisites early.
+A direct subscription-level assignment may not exist in enterprise environments. Access can be inherited from a parent management group. The LocalBox deployment identity must still have sufficient effective permissions to register providers, create resources and perform deployment operations.
+
+### Commands
+
+```powershell
+$subId = az account show --query id -o tsv
+$userId = az ad signed-in-user show --query id -o tsv
+
+az role assignment list `
+    --assignee $userId `
+    --scope "/subscriptions/$subId" `
+    --include-inherited `
+    --include-groups `
+    --query "[].{Role:roleDefinitionName,Scope:scope,Principal:principalName}" `
+    -o table
+```
+
+### Actual lab result
+
+The signed-in identity has an **Owner** role inherited from a parent management group. This is treated as effective Owner access for the subscription.
+
+### Change impact
+
+**Read-only.** No role assignment is created or changed.
+
+---
+
+## 4. Check Azure Local and Azure Arc Resource Providers
+
+### What this check does
+
+Reads the registration state of the Azure resource providers used by Azure Local, Azure Arc, Azure Local VM management, monitoring and supporting services.
+
+### Why we run it
+
+Azure Local does not depend on a single resource provider. Different capabilities use different Azure namespaces. A fresh subscription may have only a small number of providers registered by default.
 
 ### Command
 
@@ -99,7 +133,6 @@ $providers = @(
     "Microsoft.Kubernetes",
     "Microsoft.KubernetesConfiguration",
     "Microsoft.ExtendedLocation",
-    "Microsoft.HybridContainerService",
     "Microsoft.Attestation",
     "Microsoft.Storage",
     "Microsoft.KeyVault",
@@ -114,146 +147,207 @@ foreach ($provider in $providers) {
 }
 ```
 
-### Expected result
+### Actual initial lab result
 
-Each provider will normally show one of the following states:
-
-- `Registered`
-- `Registering`
-- `NotRegistered`
-
-At this stage, the command is used only to collect the current state. Providers should not be registered blindly. Registration should be based on the feature being deployed and the current Microsoft requirements for that workflow.
+This company subscription was effectively fresh. `Microsoft.GuestConfiguration` was already registered, while the remaining core providers were not registered.
 
 ### Change impact
 
-**Read-only.** This command does not register or modify any provider.
+**Read-only.** This command does not register any provider.
 
 ---
 
-## 4. What Each Provider Is Used For
+## 5. What Each Provider Is Used For
 
-| Resource provider | Primary purpose in this lab or Azure Local environment |
+| Resource provider | Purpose in the Azure Local lab |
 | --- | --- |
-| `Microsoft.AzureStackHCI` | Core Azure Local resource provider used for Azure Local registration and management. |
-| `Microsoft.HybridCompute` | Supports Azure Arc-enabled servers and connected-machine representation in Azure. |
-| `Microsoft.GuestConfiguration` | Used for guest configuration, Azure Policy scenarios and machine-level governance. |
-| `Microsoft.HybridConnectivity` | Supports connectivity capabilities associated with Azure Arc-enabled resources. |
-| `Microsoft.ResourceConnector` | Used by Azure Resource Bridge scenarios and Azure-based management of resources running on Azure Local. |
-| `Microsoft.Kubernetes` | Required for Azure Arc-enabled Kubernetes scenarios when Kubernetes is part of the solution. |
-| `Microsoft.KubernetesConfiguration` | Supports Kubernetes extensions, configuration management and GitOps scenarios. |
-| `Microsoft.ExtendedLocation` | Supports Custom Locations and Azure resources that are projected to an on-premises location. |
-| `Microsoft.HybridContainerService` | Used for AKS on Azure Local scenarios. It is not required simply to run Windows or Linux VMs. |
-| `Microsoft.Attestation` | Supports attestation-related Azure Local deployment and security workflows where required. |
-| `Microsoft.Storage` | Supports Azure storage resources that may be required by deployment, migration or operational workflows. |
-| `Microsoft.KeyVault` | Used when secrets, certificates or deployment dependencies require Azure Key Vault. |
-| `Microsoft.Insights` | Supports monitoring, diagnostics and Azure Monitor integration. |
+| `Microsoft.AzureStackHCI` | Core Azure Local resource registration and management. |
+| `Microsoft.HybridCompute` | Azure Arc-enabled server and connected-machine representation. |
+| `Microsoft.GuestConfiguration` | Machine configuration and Azure Policy guest-governance scenarios. |
+| `Microsoft.HybridConnectivity` | Connectivity capabilities used by Azure Arc-enabled resources. |
+| `Microsoft.ResourceConnector` | Azure Resource Bridge and Azure-based management of Azure Local resources. |
+| `Microsoft.Kubernetes` | Azure Arc-enabled Kubernetes scenarios and related platform dependencies. |
+| `Microsoft.KubernetesConfiguration` | Kubernetes extensions, configuration management and GitOps capabilities. |
+| `Microsoft.ExtendedLocation` | Custom Locations and Azure resources projected to an on-premises or edge location. |
+| `Microsoft.Attestation` | Attestation-related deployment and security workflows where required. |
+| `Microsoft.Storage` | Azure Storage resources used by deployment or operational workflows. |
+| `Microsoft.KeyVault` | Secrets, certificates and deployment dependencies that use Azure Key Vault. |
+| `Microsoft.Insights` | Azure Monitor, diagnostics and monitoring integration. |
+
+`Microsoft.HybridContainerService` is intentionally not part of the current core registration set because the accreditation lab does not currently require an AKS-on-Azure-Local demonstration. It can be added later if the lab scope expands.
 
 ---
 
-## 5. Create a Compact Provider Status Report
+## 6. Register the Required Core Providers
 
 ### What this command does
 
-Produces a single table showing all providers and their registration state.
+Registers the Azure resource providers needed for the current Azure Local / Arc lab scope.
 
 ### Why we run it
 
-The earlier loop is easy to read during troubleshooting, while this version is more suitable for evidence capture and documentation.
+The fresh subscription did not have the core Azure Local and Arc providers registered. Registration is required before the related Azure resource types can be deployed or managed.
 
 ### Command
 
 ```powershell
-$providerStatus = foreach ($provider in $providers) {
-    $result = az provider show `
-        --namespace $provider `
-        --query "{Provider:namespace,Status:registrationState}" `
-        -o json | ConvertFrom-Json
+$providersToRegister = @(
+    "Microsoft.AzureStackHCI",
+    "Microsoft.HybridCompute",
+    "Microsoft.HybridConnectivity",
+    "Microsoft.ResourceConnector",
+    "Microsoft.Kubernetes",
+    "Microsoft.KubernetesConfiguration",
+    "Microsoft.ExtendedLocation",
+    "Microsoft.Attestation",
+    "Microsoft.Storage",
+    "Microsoft.KeyVault",
+    "Microsoft.Insights"
+)
 
-    [PSCustomObject]@{
-        Provider = $result.Provider
-        Status   = $result.Status
-    }
+foreach ($provider in $providersToRegister) {
+    Write-Host "Registering $provider ..."
+    az provider register --namespace $provider
 }
-
-$providerStatus | Format-Table -AutoSize
 ```
 
 ### Expected result
 
-A table similar to:
+Provider registration is asynchronous. The first result may show `Registering`.
+
+### Change impact
+
+**Changes the Azure subscription configuration.** It registers resource-provider namespaces but does not create billable workload resources by itself.
+
+---
+
+## 7. Verify Provider Registration
+
+### What this command does
+
+Checks whether each requested resource provider has completed registration.
+
+### Why we run it
+
+We do not continue to LocalBox deployment until the required providers reach the `Registered` state.
+
+### Command
+
+```powershell
+foreach ($provider in $providersToRegister) {
+    az provider show `
+        --namespace $provider `
+        --query "{Provider:namespace,Status:registrationState}" `
+        -o table
+}
+```
+
+### Expected result
+
+Each provider in the required set should eventually show:
 
 ```text
-Provider                              Status
---------                              ------
-Microsoft.AzureStackHCI               Registered
-Microsoft.HybridCompute               Registered
-Microsoft.GuestConfiguration          Registered
-...
+Registered
 ```
 
 ### Change impact
 
-**Read-only.** No Azure resources are changed.
+**Read-only.** No provider or Azure resource is changed.
 
 ---
 
-## 6. Check Subscription Role Assignment
+## 8. Lock the Deployment Region
 
-### What this check does
+### Decision
 
-Lists role assignments for the currently signed-in user at subscription scope.
+The accreditation lab will use:
+
+```text
+Central India
+```
+
+### Why this matters
+
+VM SKU availability, subscription quota and deployment support are evaluated per Azure region. All subsequent quota and LocalBox SKU checks must therefore use `centralindia`.
+
+---
+
+## 9. Check Central India Compute Quota
+
+### What this command does
+
+Displays the current Azure Compute quota and usage for Central India.
 
 ### Why we run it
 
-LocalBox deployment requires sufficient subscription-level permissions. The deployment documentation should be checked for the current required role before starting the lab. For this lab, we will verify whether the deployment identity has the required subscription-level access before creating resources.
+LocalBox requires a relatively large Azure VM. Even when the subscription has permission to deploy, insufficient regional or VM-family quota can block deployment.
 
-### Commands
-
-First identify the signed-in user:
+### Command
 
 ```powershell
-az account show --query user -o json
-```
-
-Then capture the signed-in username:
-
-```powershell
-$currentUser = az account show --query user.name -o tsv
-$currentUser
-```
-
-Check role assignments at subscription scope:
-
-```powershell
-$subscriptionId = az account show --query id -o tsv
-
-az role assignment list `
-    --assignee $currentUser `
-    --scope "/subscriptions/$subscriptionId" `
-    --include-inherited `
-    --query "[].{Role:roleDefinitionName,Scope:scope}" `
+az vm list-usage `
+    --location centralindia `
     -o table
 ```
 
-### Expected result
+### What to review
 
-The output should confirm that the deployment identity has the level of access required by the current LocalBox deployment guidance.
+Pay particular attention to:
+
+- Total Regional vCPUs
+- The VM-family quota for the LocalBox VM SKU
+- Current regional usage
+- Remaining vCPU headroom
 
 ### Change impact
 
-**Read-only.** No role assignment is created or modified.
+**Read-only.** No Azure resource is changed.
 
 ---
 
-## 7. Check Azure CLI and Bicep Readiness
+## 10. Check LocalBox VM SKU Availability in Central India
 
-### What this check does
+### What this command does
 
-Confirms the installed Azure CLI version and verifies whether the Bicep component is available.
+Checks whether the candidate LocalBox VM SKUs are available in Central India and whether Azure reports any restrictions.
 
 ### Why we run it
 
-LocalBox uses Azure deployment automation. Verifying the client tools first avoids deployment failures caused by an outdated or missing local component.
+Quota alone is not enough. The selected VM SKU must also be available to this subscription in the chosen region.
+
+### Commands
+
+```powershell
+az vm list-skus `
+    --location centralindia `
+    --size Standard_E32s_v6 `
+    --all `
+    --query "[].{Name:name,Restrictions:restrictions}" `
+    -o json
+```
+
+Compare with:
+
+```powershell
+az vm list-skus `
+    --location centralindia `
+    --size Standard_E32s_v5 `
+    --all `
+    --query "[].{Name:name,Restrictions:restrictions}" `
+    -o json
+```
+
+### Change impact
+
+**Read-only.** No Azure resource is created.
+
+---
+
+## 11. Check Azure CLI and Bicep Readiness
+
+### What this check does
+
+Confirms the Azure CLI and Bicep components are available before deployment.
 
 ### Commands
 
@@ -261,47 +355,45 @@ LocalBox uses Azure deployment automation. Verifying the client tools first avoi
 az version
 ```
 
-Check Bicep:
-
 ```powershell
 az bicep version
 ```
 
-### Expected result
-
-Both commands should return version information without an error.
-
 ### Change impact
 
-**Read-only.** No Azure resources are changed.
+**Read-only.** No Azure resource is changed.
 
 ---
 
-## 8. Evidence to Capture
+## 12. Evidence to Capture
 
-For the accreditation walkthrough, capture the following results without exposing secrets or unnecessary subscription identifiers:
+For the accreditation walkthrough, capture the following without exposing confidential identifiers or credentials:
 
-1. Active subscription name and state.
-2. Tenant information only where needed for technical evidence.
-3. Resource provider registration-state table.
-4. Required deployment role confirmation.
-5. Azure CLI version.
-6. Bicep version.
-7. Any missing prerequisite identified before deployment.
+1. Active company subscription name and Enabled state.
+2. Effective Owner access confirmation.
+3. Initial resource-provider status.
+4. Provider registration commands used.
+5. Final provider registration status.
+6. Central India region decision.
+7. Central India quota output.
+8. LocalBox VM SKU availability result.
+9. Azure CLI and Bicep version checks.
+10. Final deployment readiness decision.
 
-Sensitive information should be redacted before screenshots or outputs are committed to this public repository.
+The repository is public. Full subscription IDs, tenant-sensitive details, credentials, secrets and internal company information should not be committed unless they are explicitly safe for public disclosure.
 
 ---
 
-## 9. Next Step After These Checks
+## 13. Readiness Decision
 
-Once the commands above are completed, classify each provider as:
+The subscription should be marked **GO** for LocalBox deployment only when all of the following are confirmed:
 
-- **Required now and already registered**
-- **Required now and needs registration**
-- **Optional for the current lab**
-- **Not required for the current accreditation scope**
+- Correct company subscription is active.
+- Effective Owner access is available.
+- Required resource providers are Registered.
+- Central India is selected as the deployment region.
+- Required LocalBox VM SKU is available in Central India.
+- Regional and VM-family quota is sufficient.
+- Azure CLI and Bicep checks pass.
 
-Only after this review should any missing resource provider be registered.
-
-The next implementation stage is the LocalBox deployment readiness decision: **GO** or **NO-GO**.
+Only after these checks should the actual LocalBox deployment begin.
