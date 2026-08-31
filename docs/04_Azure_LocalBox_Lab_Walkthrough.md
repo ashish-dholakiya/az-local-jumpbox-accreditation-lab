@@ -214,7 +214,49 @@ The Windows administrator password is not stored in this public repository and w
 
 ---
 
-## 6. Current Activity 3 Implementation Status
+## 6. Create and Verify the Dedicated Azure Resource Group
+
+### What was done
+
+A dedicated Azure resource group was created in Central India to contain the accreditation LocalBox deployment and simplify implementation tracking and later cleanup.
+
+### Command
+
+```powershell
+az group create `
+    --name $resourceGroupName `
+    --location $location `
+    --tags Project=AzureLocalAccreditation Environment=Lab Purpose=LocalBox
+```
+
+### Verification command
+
+```powershell
+az group show `
+    --name $resourceGroupName `
+    --query "{Name:name,Location:location,ProvisioningState:properties.provisioningState}" `
+    -o table
+```
+
+### Verified result
+
+```text
+Name                                  Location      ProvisioningState
+------------------------------------  ------------  -------------------
+rg-azlocal-localbox-accreditation-ci  centralindia  Succeeded
+```
+
+### Status
+
+**PASS.** The dedicated LocalBox accreditation resource group exists in Central India and its provisioning state is `Succeeded`.
+
+### Change impact
+
+**Azure subscription change.** A resource group and its non-billable container metadata were created. No LocalBox workload resources have been deployed yet.
+
+---
+
+## 7. Current Activity 3 Implementation Status
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -226,6 +268,7 @@ The Windows administrator password is not stored in this public repository and w
 | Tenant ID input retrieved | PASS |
 | Azure Local RP object ID retrieved | PASS |
 | Final deployment parameter values locked | PASS |
+| Dedicated LocalBox resource group created | PASS |
 | Billable LocalBox resource deployment | NOT STARTED |
 | Azure Local cluster deployment / review | NOT STARTED |
 | Azure Arc validation | NOT STARTED |
@@ -236,4 +279,4 @@ The Windows administrator password is not stored in this public repository and w
 
 ## Next Required Step
 
-Create the dedicated Azure resource group in Central India and verify it. This will be the first Azure-side change for the LocalBox implementation. The subsequent LocalBox deployment will create billable Azure resources, so cost and cleanup discipline must remain in effect.
+Prepare the secure Windows administrator password input and validate the final LocalBox deployment command without exposing the password in the public repository. The subsequent LocalBox deployment will create billable Azure resources, so cost and cleanup discipline must remain in effect.
