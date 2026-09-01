@@ -2,344 +2,287 @@
 
 ## Purpose
 
-This document captures the dependencies identified during the Azure Local accreditation lab implementation. It supports technical execution, implementation evidence, and presentation preparation.
+This document records the dependencies that were required, discovered, validated, and remediated during the Azure Local accreditation lab using Microsoft Azure Arc Jumpstart LocalBox.
 
-The register explains what was required, why it mattered, the current validation state, and how the dependency story should be positioned during the accreditation presentation.
+The register supports repeatability, troubleshooting, implementation evidence, and presentation preparation.
 
-The governing accreditation scope remains `docs/00_Accreditation_Scope_and_Customer_Scenario_Source_of_Truth.md`. This dependency register is a supporting implementation control document.
+The active lab baseline is Australia East only.
 
 ---
 
-## 1. Presentation Positioning
+## 1. Verified Deployment Baseline
 
-Recommended presentation section:
+```text
+Azure region                  australiaeast
+Azure Local instance region   australiaeast
+LocalBox host VM size         Standard_E32s_v5
+LocalBox host VM              LocalBox-Client
+Microsoft source commit       3f433866757688d926ae6707e9c0041d8e640b82
+Azure Local cluster           localboxcluster
+```
 
-**Implementation Readiness and Dependency Controls**
+Sensitive identifiers and secrets are intentionally excluded.
+
+---
+
+## 2. Workstation and Execution Dependencies
+
+| Dependency | Why it matters | Verified state |
+| --- | --- | --- |
+| PowerShell 7.6.5 | Controlled PowerShell execution environment | PASS |
+| Git 2.55.0.windows.5 | Clone and pin Microsoft source | PASS |
+| Azure CLI 2.89.1 | Authentication, provider checks, resource and deployment queries | PASS |
+| Bicep CLI 0.46.1 | LocalBox Bicep deployment workflow | PASS |
+| Az.Accounts 5.5.2 | Azure PowerShell authentication | PASS |
+| Az.Resources 10.2.0 | ARM validation and deployment operations | PASS |
+| Separate Microsoft repository | Keeps official source isolated from project documentation | PASS |
+| Exact Microsoft commit pin | Prevents source drift | PASS |
+| Runtime `githubBranch` pinned to exact commit | Prevents runtime artifact drift | PASS |
+
+---
+
+## 3. Azure Subscription and Access Dependencies
+
+| Dependency | Why it matters | Verified state |
+| --- | --- | --- |
+| Correct accreditation subscription | Prevents deployment to the wrong Azure environment | PASS |
+| Effective Owner-level access | Required for provider registration and deployment operations | PASS |
+| Australia East resource group | Dedicated deployment and cleanup boundary | PASS |
+| `Standard_E32s_v5` usability | Required for the LocalBox outer host VM | PASS |
+
+---
+
+## 4. Mandatory Azure Local Resource Providers
+
+The LocalBox workflow and Azure Local Environment Validator require the following providers for cluster integration:
+
+```text
+Microsoft.KubernetesConfiguration
+Microsoft.ExtendedLocation
+Microsoft.HybridContainerService
+Microsoft.HybridCompute
+Microsoft.AzureStackHCI
+Microsoft.ResourceConnector
+Microsoft.Kubernetes
+Microsoft.EdgeMarketplace
+```
+
+Final verified state:
+
+```text
+Microsoft.KubernetesConfiguration : Registered
+Microsoft.ExtendedLocation        : Registered
+Microsoft.HybridContainerService  : Registered
+Microsoft.HybridCompute           : Registered
+Microsoft.AzureStackHCI           : Registered
+Microsoft.ResourceConnector       : Registered
+Microsoft.Kubernetes              : Registered
+Microsoft.EdgeMarketplace         : Registered
+```
+
+### Important implementation lesson
+
+LocalBox attempts to register missing providers automatically, but Azure provider registration is asynchronous. The LocalBox polling window can end before Azure has fully propagated registration.
+
+During this lab, Azure Local Arc Integration validation detected that `Microsoft.HybridContainerService` had not yet completed registration. `Microsoft.HybridContainerService` and `Microsoft.EdgeMarketplace` were explicitly registered and monitored until both reached `Registered`, after which validation succeeded.
+
+This dependency should therefore be checked before cluster validation rather than relying only on the automatic LocalBox registration request.
+
+---
+
+## 5. Direct Azure Resource Dependencies
+
+The official LocalBox Bicep deployment also uses Azure resource providers and services including:
+
+```text
+Microsoft.Authorization
+Microsoft.Compute
+Microsoft.Network
+Microsoft.OperationalInsights
+Microsoft.Resources
+Microsoft.Storage
+Microsoft.KeyVault
+Microsoft.Insights
+```
+
+Relevant providers were verified and registered before or during implementation.
+
+---
+
+## 6. LocalBox Architecture Dependency
+
+The lab depends on nested virtualization.
+
+One Azure IaaS VM is deployed:
+
+```text
+LocalBox-Client
+```
+
+Inside it, Hyper-V hosts the nested LocalBox environment:
+
+```text
+AzLMGMT
+AzLHOST1
+AzLHOST2
+```
+
+`AzLHOST1` and `AzLHOST2` are the two Azure Local nodes. They are not separate top-level Azure IaaS VMs.
+
+### Why this matters
+
+LocalBox is a lab/sandbox implementation. The outer Azure VM provides the compute, storage, networking, and Hyper-V capability required to emulate Azure Local without requiring separate physical Azure Local servers.
+
+This is not the production Azure Local hardware model.
+
+Microsoft references:
+
+https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/bicep/host/host.bicep
+
+https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/LocalBox-Config.psd1
+
+https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/New-LocalBoxCluster.ps1
+
+---
+
+## 7. Bootstrap and Continuation Dependencies
+
+LocalBox host deployment alone is not the end of deployment.
+
+The Bootstrap extension performs additional preparation, including Hyper-V installation and creation of the LocalBox logon workflow. Hyper-V requires reboot completion before the nested environment can continue.
+
+Verified state:
+
+```text
+Bootstrap extension   Succeeded
+Hyper-V               Installed
+LocalBox automation   Started successfully
+```
+
+The `LocalBox-Client` VM must not be stopped or deallocated while this automation is still running.
+
+---
+
+## 8. Cluster Validation Dependency
+
+The Azure Local validation deployment is:
+
+```text
+localcluster-validate
+```
+
+Validation must pass before the actual cluster deployment is considered ready.
+
+Final result:
+
+```text
+localcluster-validate : Succeeded
+```
+
+The final validation report showed successful checks across Remote Management, Connectivity, Active Directory, Hardware, Networking, Observability, Software, MOC Stack, Arc Integration, Cluster Witness, DNS, NTP, Cluster Validation, LLDP, and Storage Validation.
+
+---
+
+## 9. Actual Cluster Deployment Dependency
+
+The Azure Local cluster deployment is:
+
+```text
+localcluster-deploy
+```
+
+The deployment took approximately 2 hours 19 minutes.
+
+Final authoritative state:
+
+```text
+State    : Succeeded
+Error    : null
+```
+
+The child deployment settings also reported:
+
+```text
+provisioningState       : Succeeded
+deploymentStatus.status : Success
+validationStatus.status : Success
+```
+
+### Long-running deployment note
+
+A synchronous Azure VM Run Command invocation can time out while the Azure Local ARM deployment continues successfully in the Azure control plane.
+
+Therefore, long-running deployment health should be monitored using ARM deployment status and deployment operations rather than interpreting a Run Command timeout as Azure Local deployment failure.
+
+---
+
+## 10. Final Connectivity Dependency
+
+Deployment success alone is not sufficient. Azure Local must also be operationally connected to Azure.
+
+Final verified cluster state:
+
+```text
+ProvisioningState  : Succeeded
+ConnectivityStatus : Connected
+Status             : ConnectedRecently
+```
+
+Status: **PASS**.
+
+---
+
+## 11. Security Controls
+
+The following must never be committed to the public repository:
+
+- full Azure subscription ID
+- tenant ID
+- Azure Local resource-provider object ID
+- Windows administrator password
+- access tokens
+- credentials or secrets
+- sensitive screenshots
+
+The LocalBox administrator password is runtime-only input.
+
+---
+
+## 12. Current Dependency Readiness
+
+| Area | Status |
+| --- | --- |
+| Subscription and access | PASS |
+| Australia East region | PASS |
+| VM SKU | PASS |
+| Workstation tooling | PASS |
+| Microsoft source pinning | PASS |
+| Runtime source pinning | PASS |
+| Mandatory resource providers | PASS |
+| LocalBox host deployment | PASS |
+| Bootstrap and Hyper-V | PASS |
+| Nested Azure Local nodes | PASS |
+| Arc integration | PASS |
+| Azure Local validation | PASS |
+| Azure Local deployment | PASS |
+| Azure Local connectivity | PASS |
+| Azure Local VM lifecycle | PENDING |
+| Logical workload networking | PENDING |
+| Monitoring and management | PENDING |
+| Update and lifecycle validation | PENDING |
+
+---
+
+## 13. Presentation Positioning
 
 Recommended message:
 
-> Before deploying the Azure Local Jumpstart LocalBox environment, we validated subscription access, region and quota readiness, tooling, Azure resource-provider registrations, source reproducibility, execution continuity, and secure runtime secret input. Dependencies that were not obvious at the beginning of the implementation were converted into a formal dependency register so that the proof of concept remains repeatable, auditable, and controlled.
-
----
-
-## 2. Dependency Classification
-
-To avoid confusing Microsoft LocalBox implementation details with prerequisites required in this accreditation lab, dependencies are classified into three groups.
-
-### 2.1 Our Deployment Dependencies
-
-These are prerequisites that must exist or be validated in the accreditation environment before the LocalBox deployment can proceed safely.
-
-| Category | Dependency | Why it matters | Status |
-| --- | --- | --- | --- |
-| Subscription | Correct company accreditation subscription selected | Prevents deployment into an incorrect or personal test subscription. | PASS |
-| Access | Effective Owner RBAC | Required for provider registration, resource group operations, and LocalBox deployment activities. | PASS |
-| Region | Central India selected | Keeps the lab aligned to the selected deployment region. | PASS |
-| Quota | Total Regional vCPU quota | LocalBox requires a large Azure VM, so sufficient regional quota is mandatory. | PASS |
-| Quota | Standard Esv6 Family vCPU quota | Required for `Standard_E32s_v6`. | PASS |
-| SKU | `Standard_E32s_v6` availability | Required by the verified LocalBox deployment template. | PASS |
-| Tooling | Git | Required to clone and pin the official Microsoft Jumpstart source. | PASS |
-| Tooling | PowerShell 7 | Used for controlled execution from VS Code. | PASS |
-| Tooling | Azure CLI | Required for authentication, subscription validation, provider operations, resource verification, and deployment. | PASS |
-| Tooling | Bicep CLI | Required for the official LocalBox Bicep deployment workflow. | PASS |
-| Tooling | `Az.Resources` PowerShell module `10.1.0` | Provides `New-AzResourceGroupDeployment`, matching the Azure PowerShell deployment pattern used by Microsoft's LocalBox validation pipeline. | PASS |
-| Source Control | Accreditation repository cloned locally | Provides persistent access to the accreditation source of truth and implementation documentation. | PASS |
-| Source Control | Microsoft `azure_arc` repository cloned separately | Keeps Microsoft deployment source separate from accreditation documentation and avoids nested Git repository issues. | PASS |
-| Source Control | Microsoft repository pinned to exact commit | Avoids dependence on a moving source branch and improves repeatability. | PASS |
-| Runtime Source | Runtime `githubBranch` behavior | The LocalBox template uses this value for raw GitHub runtime artifacts. The exact verified commit must be used instead of a moving `main` reference. | PASS |
-| Provider | `Microsoft.AzureStackHCI` | Required for Azure Local resource registration and management. | PASS |
-| Provider | `Microsoft.HybridCompute` | Supports Azure Arc-enabled resource integration. | PASS |
-| Provider | `Microsoft.HybridConnectivity` | Supports hybrid connectivity functions used by Azure Arc scenarios. | PASS |
-| Provider | `Microsoft.ResourceConnector` | Supports Arc Resource Bridge and related Azure Local integration. | PASS |
-| Provider | `Microsoft.Kubernetes` | Required by supporting Arc/Kubernetes resource integration where referenced. | PASS |
-| Provider | `Microsoft.KubernetesConfiguration` | Required for Kubernetes configuration integration where referenced. | PASS |
-| Provider | `Microsoft.ExtendedLocation` | Required for extended/custom location concepts used by Azure Local. | PASS |
-| Provider | `Microsoft.Attestation` | Supports Azure Local attestation-related integration. | PASS |
-| Provider | `Microsoft.Compute` | Required for VM deployment, sizing, and quota validation. | PASS |
-| Provider | `Microsoft.Network` | Required for VNet, NIC, public IP, NAT gateway, and related network resources. Initially discovered as `NotRegistered` during direct Bicep dependency validation. | PASS |
-| Provider | `Microsoft.OperationalInsights` | Required for Log Analytics workspace and monitoring resources. Initially discovered as `NotRegistered` during direct Bicep dependency validation. | PASS |
-| Provider | `Microsoft.Storage` | Required for staging/storage resources used by the LocalBox deployment. | PASS |
-| Provider | `Microsoft.KeyVault` | Supporting provider registered during subscription readiness validation. | PASS |
-| Provider | `Microsoft.Insights` | Supporting provider registered for Azure Monitor-related integration. | PASS |
-| Execution Continuity | Dedicated Azure CLI profile | Isolates the accreditation Azure login/subscription context from other Azure projects on the same workstation. | PASS |
-| Execution Continuity | Local VS Code workflow | Avoids dependency on ephemeral Cloud Shell sessions for long-running accreditation work. | PASS |
-| Execution Continuity | Resume helper script | Allows the implementation session to be safely resumed after terminal closure or laptop restart. | PASS |
-| Security | Secure Windows administrator password input | Mandatory LocalBox deployment parameter. Runtime input was validated with PowerShell `Read-Host -AsSecureString`; the value was not printed or stored in evidence. | PASS |
-| Deployment | Final LocalBox deployment command validation | Required before billable LocalBox resources are created. | PENDING |
-| Deployment | LocalBox resource deployment | Creates the Azure Local Jumpstart LocalBox lab resources and begins billable workload deployment. | NOT STARTED |
-
-### 2.2 Microsoft LocalBox Solution Components
-
-These components are part of, or directly referenced by, the Microsoft LocalBox implementation. They should not automatically be described as separate accreditation prerequisites unless they require an explicit dependency action in our environment.
-
-| Microsoft LocalBox component | Role in the solution | How we use or treat it |
-| --- | --- | --- |
-| Microsoft `azure_arc` GitHub repository | Official source for Azure Arc Jumpstart LocalBox | Used as the authoritative Microsoft deployment source and pinned to a verified commit. |
-| Bicep templates | Define Azure resources for LocalBox | Used as the official deployment mechanism. |
-| PowerShell automation | Performs bootstrap, configuration, and supporting automation | Treated as Microsoft solution automation rather than separately reinvented scripts. |
-| Runtime GitHub artifacts | Scripts and supporting artifacts are retrieved through raw GitHub URLs | Runtime reference was validated against the exact pinned commit. |
-| Azure Compute | Provides the large Azure VM used to host the LocalBox environment | Subscription quota and supported VM SKU were validated before deployment. |
-| Azure Networking | Provides VNet, NIC, public IP, NAT, and related networking | `Microsoft.Network` was identified and registered before deployment. |
-| Azure Storage | Provides staging/storage resources used during deployment | Direct Bicep provider dependency validated. |
-| Log Analytics | Provides monitoring/log collection resources | `Microsoft.OperationalInsights` was identified and registered before deployment. |
-| Azure Local and Azure Arc integrations | Provide the Azure Local cluster and Azure management-plane experience required by the PoC | Required resource providers were validated as part of subscription readiness. |
-| Resource Bridge / extended location capabilities | Support Arc and Azure Local resource projection/integration | Supporting resource providers were validated before deployment. |
-
-### 2.3 Microsoft Validation and Engineering Controls
-
-The Microsoft repository also contains engineering and integration-testing controls used by Microsoft to validate LocalBox. These are useful implementation references, but they are not automatically dependencies of our accreditation deployment.
-
-| Microsoft validation control | Purpose in Microsoft engineering | Accreditation treatment |
-| --- | --- | --- |
-| Azure DevOps pipeline | Automates Microsoft LocalBox deployment and test execution | Reference only. We are not required to run Microsoft's internal pipeline to perform the accreditation PoC. |
-| `New-AzResourceGroupDeployment` with `TemplateParameterObject` | Microsoft pipeline deployment pattern for passing Bicep parameters | Used as a supported-pattern reference while designing our secure local deployment flow. `Az.Resources 10.1.0` is now installed locally to support this deployment pattern. |
-| Secure pipeline variable for Windows administrator password | Keeps the administrator password out of source code | Security pattern to follow. Our runtime-only secure input method was validated locally without exposing the secret. |
-| Pester integration tests | Automated validation of deployed LocalBox behavior | Microsoft engineering validation mechanism. Not classified as a mandatory accreditation dependency unless we explicitly decide to run equivalent tests. |
-| Automated teardown | Removes Microsoft test resource groups after validation or failure | Useful operational reference for cost control and cleanup, but not itself a prerequisite for deployment. |
-| Scheduled pipeline runs | Repeatedly validate current Microsoft LocalBox source | Microsoft CI practice, not a deployment requirement for our accreditation lab. |
-
-### Important distinction for presentation
-
-Do not present every Microsoft engineering component as a mandatory customer or accreditation dependency.
-
-Use this distinction:
-
-- **Our Deployment Dependencies:** what our environment must have before deployment.
-- **Microsoft LocalBox Solution Components:** what the LocalBox solution itself uses.
-- **Microsoft Validation and Engineering Controls:** how Microsoft validates and maintains the solution internally.
-
----
-
-## 3. Dependencies Identified During Implementation
-
-Some dependencies were known before implementation, while others became visible only after inspecting the actual Microsoft LocalBox source and running readiness checks.
-
-### Initially known prerequisites
-
-- Correct Azure subscription.
-- Owner access.
-- Target region.
-- VM SKU and quota.
-- Azure Local and Azure Arc provider registrations.
-- Azure CLI and Bicep tooling.
-
-### Dependencies discovered during deeper validation
-
-#### `Microsoft.Network`
-
-The direct LocalBox Bicep dependency scan showed that `Microsoft.Network` is referenced by the official deployment modules.
-
-Initial state:
-
-```text
-Microsoft.Network : NotRegistered
-```
-
-Final state:
-
-```text
-Microsoft.Network : Registered
-```
-
-#### `Microsoft.OperationalInsights`
-
-The direct LocalBox Bicep dependency scan showed that `Microsoft.OperationalInsights` is required for Log Analytics resources.
-
-Initial state:
-
-```text
-Microsoft.OperationalInsights : NotRegistered
-```
-
-Final state:
-
-```text
-Microsoft.OperationalInsights : Registered
-```
-
-#### Runtime GitHub source reference
-
-The LocalBox template defaults `githubBranch` to `main` and builds raw GitHub artifact URLs from that value.
-
-A runtime artifact was tested against the exact verified Microsoft source commit:
-
-```text
-3f433866757688d926ae6707e9c0041d8e640b82
-```
-
-Verified result:
-
-```text
-Pinned runtime artifact reachable: True
-HTTP Status: 200
-```
-
-This allows the deployment to use the exact commit reference for runtime artifacts instead of relying on a moving `main` branch.
-
-#### Azure PowerShell deployment module
-
-Microsoft's LocalBox validation pipeline uses `New-AzResourceGroupDeployment` with a parameter object. Local availability was checked and `Az.Resources` was initially absent. It was installed for the current user and then verified as:
-
-```text
-Az.Resources 10.1.0
-```
-
-Status: **PASS**.
-
-#### Secure Windows administrator password input
-
-The LocalBox Windows administrator password was captured through PowerShell using a secure prompt:
-
-```powershell
-$localBoxPassword = Read-Host "Enter LocalBox Windows admin password" -AsSecureString
-```
-
-Validation output intentionally exposed only the capture state and object type:
-
-```text
-Secure password captured: True
-Object type: System.Security.SecureString
-```
-
-The secret value was not printed or stored in the public evidence trail.
-
-Status: **PASS**.
-
----
-
-## 4. Execution Continuity Dependency
-
-Cloud Shell was initially used for readiness and source validation. During implementation it became clear that an ephemeral shell session is not ideal for work performed in multiple short sessions.
-
-The execution model was therefore moved to a persistent VS Code workflow.
-
-Verified local components:
-
-- Git `2.55.0`.
-- PowerShell `7.6.5`.
-- Azure CLI `2.89.1`.
-- Bicep CLI `0.46.1`.
-- Az.Resources PowerShell module `10.1.0`.
-- Local accreditation repository.
-- Separate local Microsoft `azure_arc` repository.
-- Dedicated Azure CLI profile for accreditation.
-- Resume helper script for state validation.
-
-This change did not alter the accreditation architecture or deployment method. It only improved execution continuity and reduced session-related risk.
-
----
-
-## 5. Security Dependencies and Controls
-
-The following values must not be committed to the public accreditation repository:
-
-- Full Azure subscription ID.
-- Tenant ID.
-- Azure Local resource-provider object ID.
-- Windows administrator password.
-- Credentials, tokens, or secrets.
-- Confidential internal documentation.
-- Sensitive screenshots.
-
-The Windows administrator password required by the LocalBox template is a runtime-only secure input.
-
-The Microsoft LocalBox Bicep template marks the Windows administrator password as a secure parameter. Microsoft's own validation pipeline passes the value through a deployment parameter object rather than embedding the secret into the Bicep source. Our local validation confirmed that PowerShell can capture the password as `System.Security.SecureString` without displaying the secret value.
-
----
-
-## 6. Current Dependency Readiness
-
-### Completed
-
-- Subscription selection and isolation.
-- Owner access validation.
-- Central India region decision.
-- VM SKU availability.
-- Regional and VM-family quota.
-- Core Azure Local and Azure Arc providers.
-- Direct LocalBox Bicep provider dependencies.
-- Azure CLI.
-- Bicep CLI.
-- Az.Resources PowerShell module `10.1.0`.
-- Official Microsoft source pinning.
-- Runtime artifact exact-commit reachability.
-- Persistent VS Code execution environment.
-- Resume workflow.
-- Secure runtime Windows administrator password input.
-
-### Pending before billable deployment
-
-1. Final LocalBox deployment command validation.
-
-### Not started
-
-- Billable LocalBox deployment.
-- Azure Local cluster deployment/review validation.
-- Azure Arc validation.
-- Azure Local VM creation and lifecycle validation.
-- Logical workload networking validation.
-- Azure monitoring and management validation.
-- Azure Local update and lifecycle validation.
-
----
-
-## 7. Key Lessons Learned
-
-1. Provider dependencies should be validated against the actual deployment source rather than assumed only from an initial prerequisite list.
-2. Local repository pinning alone does not guarantee runtime reproducibility when deployment scripts download artifacts from GitHub. Runtime references must also be validated.
-3. Cloud Shell is useful for quick checks, but a persistent local VS Code workflow is more suitable for an accreditation lab completed over multiple working sessions.
-4. Azure CLI context should be isolated when multiple Azure projects and accounts exist on the same workstation.
-5. Secrets must remain outside the public repository and presentation evidence.
-6. Microsoft solution components and Microsoft internal validation controls should not be incorrectly represented as customer-side mandatory dependencies.
-7. Turning hidden prerequisites into a dependency register makes implementation delays explainable as controlled risk reduction rather than unstructured troubleshooting.
-
----
-
-## 8. Presentation Content
-
-This document must feed the accreditation presentation.
-
-### Suggested slide: Implementation Readiness Controls
-
-- Validated company subscription, Owner access, Central India region, quota, and VM SKU availability.
-- Validated and registered required Azure Local, Arc, Compute, Network, Storage, Monitoring, and Log Analytics resource providers.
-- Validated local deployment tooling including Azure CLI, Bicep, PowerShell 7, and `Az.Resources 10.1.0`.
-- Validated secure runtime password capture without exposing the secret in source or evidence.
-- Moved execution from Cloud Shell to a persistent VS Code workflow to avoid session loss.
-- Isolated the accreditation Azure CLI profile from other Azure projects on the workstation.
-- Pinned the official Microsoft LocalBox source and validated runtime artifact reachability.
-
-### Suggested slide: Microsoft LocalBox Implementation Reference
-
-- Official LocalBox source is maintained in Microsoft's `azure_arc` repository.
-- LocalBox uses Bicep for infrastructure deployment and PowerShell for supporting automation.
-- Runtime scripts and artifacts can be retrieved from GitHub and therefore require source-reference control for repeatability.
-- Microsoft LocalBox integrates Azure Compute, Networking, Storage, Log Analytics, Azure Local, and Azure Arc-related services.
-
-### Suggested slide: Microsoft Validation vs Our Deployment Dependencies
-
-- Microsoft uses an Azure DevOps pipeline to automate LocalBox deployment and integration testing.
-- Microsoft's pipeline uses Azure PowerShell deployment commands and parameter objects, including secure handling of the administrator password.
-- Microsoft also uses Pester integration tests and automated teardown in its validation process.
-- These Microsoft engineering controls are useful implementation references, but they are not automatically mandatory dependencies of our accreditation PoC.
-
-### Suggested slide: Dependency Register and Risk Reduction
-
-- Converted implementation prerequisites into a formal dependency register.
-- Identified `Microsoft.Network` and `Microsoft.OperationalInsights` before billable deployment.
-- Prevented source drift by validating both local source pinning and runtime GitHub artifact references.
-- Kept secrets and sensitive identifiers outside the public evidence repository.
-
-### Suggested slide: Current Build Readiness
-
-- Subscription, access, region, quota, tooling, source, runtime references, direct provider dependencies, and secure password input: **Ready**.
-- Pending before deployment: final deployment command validation.
-- LocalBox workload deployment: **Not Started**.
-
----
-
-## 9. Governance
-
-This dependency register supports Accreditation Activity 3: Azure Local Proof of Concept using Microsoft Azure Arc Jumpstart LocalBox.
-
-It does not replace the accreditation source-of-truth document. All implementation and presentation decisions must remain traceable to the required accreditation activities and customer scenario.
+> We treated subscription access, provider readiness, source pinning, regional compute availability, nested virtualization, secure runtime inputs, deployment validation, and operational connectivity as explicit implementation dependencies. This converted troubleshooting into controlled readiness validation and produced a repeatable Azure Local PoC deployment process.
+
+Key presentation lessons:
+
+1. Validate providers before cluster validation.
+2. Distinguish outer Azure VM deployment from nested Azure Local nodes.
+3. Monitor long-running Azure Local deployments through Azure Resource Manager rather than only through the initiating shell command.
+4. Treat `ProvisioningState = Succeeded` and `ConnectivityStatus = Connected` as separate completion gates.
+5. Keep Microsoft source pinned and secrets out of public evidence.
