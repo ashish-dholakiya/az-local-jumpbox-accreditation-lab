@@ -32,7 +32,8 @@ Sensitive identifiers and secrets are intentionally excluded.
 | PowerShell 7.6.5 | Controlled PowerShell execution environment | PASS |
 | Git 2.55.0.windows.5 | Clone and pin Microsoft source | PASS |
 | Azure CLI 2.89.1 | Authentication, provider checks, resource and deployment queries | PASS |
-| Azure CLI `customlocation` extension | Required by `az customlocation` commands used to discover and validate the Azure Local custom location before VM lifecycle work | DISCOVERED / INSTALLING |
+| Azure CLI `customlocation` extension | Required by `az customlocation` commands used for Azure Local custom-location discovery and validation | PASS |
+| Azure CLI `stack-hci-vm` extension | Required by `az stack-hci-vm` commands used for logical network, image, and VM lifecycle operations | PASS |
 | Bicep CLI 0.46.1 | LocalBox Bicep deployment workflow | PASS |
 | Az.Accounts 5.5.2 | Azure PowerShell authentication | PASS |
 | Az.Resources 10.2.0 | ARM validation and deployment operations | PASS |
@@ -40,22 +41,22 @@ Sensitive identifiers and secrets are intentionally excluded.
 | Exact Microsoft commit pin | Prevents source drift | PASS |
 | Runtime `githubBranch` pinned to exact commit | Prevents runtime artifact drift | PASS |
 
-### Azure CLI `customlocation` extension behavior
+### Azure CLI extension behavior
 
-The first execution of an `az customlocation` command on a workstation where the extension is not already installed can produce an interactive prompt similar to:
+The first execution of a command whose extension is not installed can produce an interactive installation prompt. This was observed with both `customlocation` and `stack-hci-vm` during the operational validation phase.
 
-```text
-The command requires the extension customlocation.
-Do you want to install it now? (Y/n)
+Installing these extensions is a **local Azure CLI tooling change only**. It does not create, modify, or delete Azure Local or Azure subscription resources.
+
+The pinned Microsoft `Configure-VMLogicalNetwork.ps1` also explicitly installs both extensions before creating the LocalBox workload logical network:
+
+```powershell
+az extension add --name customlocation
+az extension add --name stack-hci-vm
 ```
 
-Azure CLI can then search for and install the required extension before continuing the original command.
+For unattended automation, extension installation should be configured deliberately rather than depending on an interactive prompt.
 
-This is a **local Azure CLI tooling change only**. Installing the extension does not create, modify, or delete Azure Local or Azure subscription resources.
-
-Azure CLI may also display guidance about dynamic extension installation and preview-version behavior. For unattended automation, extension installation behavior should be configured deliberately rather than relying on an interactive prompt. For this accreditation lab, the interactive installation was accepted when first encountered, and the resulting extension state should be verified after installation completes.
-
-This dependency is important for repeatability because a fresh workstation can otherwise appear to fail at the custom-location discovery step even though the Azure Local environment itself is healthy.
+Status: **PASS**.
 
 ---
 
@@ -250,7 +251,119 @@ Status: **PASS**.
 
 ---
 
-## 11. Security Controls
+## 11. Layered Networking Dependency
+
+LocalBox contains several distinct network layers. Treating one of the transport networks as the workload network would produce incorrect VM networking.
+
+Verified network map:
+
+| Network | Function | Status |
+| --- | --- | --- |
+| `172.16.1.0/24` | Outer Azure subnet for `LocalBox-Client` | PASS |
+| `192.168.1.0/24` | Azure Local infrastructure/management network | PASS |
+| `192.168.128.0/24` | LocalBox host NAT transport network | PASS |
+| `192.168.46.0/24` | LocalBox NAT/router routing subnet | PASS |
+| `192.168.200.0/24` | Azure Local workload VM network, VLAN 200 | PASS |
+
+The pinned Microsoft configuration defines:
+
+```text
+natHostSubnet = 192.168.128.0/24
+natSubnet     = 192.168.46.0/24
+vmGateway     = 192.168.200.1
+vmIpPrefix    = 192.168.200.0/24
+vmDNS         = 192.168.1.254
+vmVLAN        = 200
+```
+
+This confirms that `192.168.128.0/24` and `192.168.46.0/24` are LocalBox transport/routing networks, not the Azure Local workload subnet.
+
+Status: **PASS**.
+
+---
+
+## 12. Logical Workload Network Dependency
+
+The pinned Microsoft `Configure-VMLogicalNetwork.ps1` defines the expected workload logical network as:
+
+```text
+Name       localbox-vm-lnet-vlan200
+VM switch  ConvergedSwitch(compute_management)
+Prefix     192.168.200.0/24
+Gateway    192.168.200.1
+DNS        192.168.1.254
+VLAN       200
+Allocation static
+```
+
+The logical network was created through Azure Portal using those values and was then validated through `az stack-hci-vm network lnet show`.
+
+Final provisioning state:
+
+```text
+Succeeded
+```
+
+The portal workflow did not require an explicit IP pool. Backend inspection showed that the service materialized a pool spanning the workload subnet after creation.
+
+Status: **PASS**.
+
+---
+
+## 13. Workload Storage Dependency
+
+Two Azure Local workload storage paths were discovered and validated before VM lifecycle work:
+
+```text
+UserStorage1-62e88607ab3c4e25b3dbe4a59b0586c3
+UserStorage2-96458537fbbd4688a9cb1745f822f5d2
+```
+
+Both reported `Succeeded` and mapped to cluster storage paths under `C:\ClusterStorage`.
+
+For the Marketplace image exercise, Azure Portal storage placement was left on `Choose automatically`. This was intentional because the lab has no requirement to force image placement to a specific storage path.
+
+Status: **PASS**.
+
+---
+
+## 14. Azure Local Marketplace Image Dependency
+
+The first workload VM image was created from Azure Marketplace through Azure Portal:
+
+```text
+[smalldisk] Windows Server 2025 Datacenter: Azure Edition - Gen2
+```
+
+Image resource name:
+
+```text
+ws2025-azureedition-smalldisk
+```
+
+Final backend validation:
+
+```text
+Progress     : 100
+State        : Succeeded
+Operation    : Succeeded
+ErrorCode    : empty
+ErrorMessage : empty
+```
+
+### Long-running image ingestion observation
+
+The image ingestion took roughly three hours in this nested LocalBox environment. Progress continued throughout the operation and the backend reported no error.
+
+This is a **lab observation, not a production benchmark**. LocalBox includes nested virtualization, virtualized networking, routing/NAT, and virtualized storage layers that can materially affect ingestion behavior.
+
+For production operations, approved gold images should be prepared, patched, tested, versioned, published, reused, and retired through a defined image lifecycle. Image download/import should not be an on-demand prerequisite for every VM deployment.
+
+Status: **PASS**.
+
+---
+
+## 15. Security Controls
 
 The following must never be committed to the public repository:
 
@@ -266,7 +379,7 @@ The LocalBox administrator password is runtime-only input.
 
 ---
 
-## 12. Current Dependency Readiness
+## 16. Current Dependency Readiness
 
 | Area | Status |
 | --- | --- |
@@ -274,7 +387,8 @@ The LocalBox administrator password is runtime-only input.
 | Australia East region | PASS |
 | VM SKU | PASS |
 | Workstation tooling | PASS |
-| Azure CLI `customlocation` extension | DISCOVERED / INSTALLING |
+| Azure CLI `customlocation` extension | PASS |
+| Azure CLI `stack-hci-vm` extension | PASS |
 | Microsoft source pinning | PASS |
 | Runtime source pinning | PASS |
 | Mandatory resource providers | PASS |
@@ -285,18 +399,20 @@ The LocalBox administrator password is runtime-only input.
 | Azure Local validation | PASS |
 | Azure Local deployment | PASS |
 | Azure Local connectivity | PASS |
-| Azure Local VM lifecycle | PENDING |
-| Logical workload networking | PENDING |
+| Logical workload networking | PASS |
+| Workload storage readiness | PASS |
+| Azure Local Marketplace VM image | PASS |
+| Azure Local VM creation and lifecycle | PENDING |
 | Monitoring and management | PENDING |
 | Update and lifecycle validation | PENDING |
 
 ---
 
-## 13. Presentation Positioning
+## 17. Presentation Positioning
 
 Recommended message:
 
-> We treated subscription access, provider readiness, source pinning, regional compute availability, nested virtualization, secure runtime inputs, deployment validation, and operational connectivity as explicit implementation dependencies. This converted troubleshooting into controlled readiness validation and produced a repeatable Azure Local PoC deployment process.
+> We treated subscription access, provider readiness, source pinning, regional compute availability, nested virtualization, secure runtime inputs, deployment validation, workload networking, image readiness, and operational connectivity as explicit implementation dependencies. This converted troubleshooting into controlled readiness validation and produced a repeatable Azure Local PoC process.
 
 Key presentation lessons:
 
@@ -305,4 +421,7 @@ Key presentation lessons:
 3. Monitor long-running Azure Local deployments through Azure Resource Manager rather than only through the initiating shell command.
 4. Treat `ProvisioningState = Succeeded` and `ConnectivityStatus = Connected` as separate completion gates.
 5. Keep Microsoft source pinned and secrets out of public evidence.
-6. Treat Azure CLI extensions such as `customlocation` as explicit workstation dependencies for repeatable operational validation.
+6. Treat Azure CLI extensions such as `customlocation` and `stack-hci-vm` as explicit workstation dependencies.
+7. Distinguish LocalBox transport networks from the Azure Local workload logical network.
+8. Maintain approved, reusable, versioned gold images in production rather than downloading an image for every VM deployment.
+9. Do not use LocalBox image-ingestion timing as a production Azure Local performance benchmark.
