@@ -333,7 +333,37 @@ Status: **PASS**.
 
 ---
 
-## 12. Current Activity 3 Status
+## 12. Portal Validation Evidence
+
+Azure Portal access was validated after the cluster deployment completed. The Azure Local resource was opened through the Azure Arc supported-environments experience and the deployed system was visible as `localboxcluster`.
+
+Verified portal observations include:
+
+- Azure Local system name: `localboxcluster`.
+- Azure connection state: connected.
+- Azure region: Australia East.
+- Machine count: `2`.
+- Azure Local updates state: `Up to date` at the time of capture.
+- Cluster overview and management experience accessible from Azure Portal.
+- Workload virtual machine count remained `0` at this checkpoint because VM lifecycle validation had not yet started.
+
+### Sanitized portal evidence
+
+![Azure Local cluster overview](../evidence/portal/azure-local-cluster-overview-redacted.png)
+
+*Figure 1. Sanitized Azure Local cluster overview showing the deployed `localboxcluster` management experience without exposing subscription or account identifiers.*
+
+![Azure Local cluster updates and management view](../evidence/portal/azure-local-cluster-overview-updates.png)
+
+*Figure 2. Sanitized Azure Local portal evidence showing the current update and cluster management state.*
+
+The source screenshots were sanitized before being committed to the public repository. Full subscription IDs, account identifiers, tenant identifiers, credentials, and other sensitive values are intentionally excluded.
+
+Status: **PASS**.
+
+---
+
+## 13. Current Activity 3 Status
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -349,6 +379,8 @@ Status: **PASS**.
 | Azure Local cluster validation | PASS |
 | Azure Local cluster deployment | PASS |
 | Azure Local connectivity | PASS |
+| Azure Portal cluster visibility | PASS |
+| Portal validation evidence | PASS |
 | Azure Local VM lifecycle validation | PENDING |
 | Logical workload networking validation | PENDING |
 | Azure monitoring and management validation | PENDING |
@@ -358,7 +390,7 @@ Status: **PASS**.
 
 ## Next Required Step
 
-The LocalBox infrastructure and Azure Local cluster are successfully deployed and connected.
+The LocalBox infrastructure and Azure Local cluster are successfully deployed, connected, and validated in Azure Portal.
 
 The next implementation work should move to the remaining Accreditation Activity 3 operational outcomes, one at a time:
 
