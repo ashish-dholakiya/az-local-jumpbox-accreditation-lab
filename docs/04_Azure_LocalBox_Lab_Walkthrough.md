@@ -53,6 +53,13 @@ Az.Accounts 5.5.2
 Az.Resources 10.2.0
 ```
 
+Azure CLI operational validation also required the following extensions:
+
+```text
+customlocation
+stack-hci-vm
+```
+
 The accreditation repository and Microsoft repository are maintained separately.
 
 Status: **PASS**.
@@ -363,7 +370,127 @@ Status: **PASS**.
 
 ---
 
-## 13. Current Activity 3 Status
+## 13. Layered LocalBox Networking
+
+Network discovery showed that LocalBox uses several distinct network layers. They must not be treated as one flat address space.
+
+| Network | Purpose |
+| --- | --- |
+| `172.16.1.0/24` | Outer Azure subnet used by `LocalBox-Client` |
+| `192.168.1.0/24` | Azure Local infrastructure and management network |
+| `192.168.128.0/24` | LocalBox host NAT transport network |
+| `192.168.46.0/24` | LocalBox NAT/router routing subnet |
+| `192.168.200.0/24` | Azure Local workload VM network, VLAN 200 |
+
+The pinned Microsoft `LocalBox-Config.psd1` confirms the workload VM values:
+
+```text
+vmGateway  = 192.168.200.1
+vmIpPrefix = 192.168.200.0/24
+vmDNS      = 192.168.1.254
+vmVLAN     = 200
+```
+
+It separately defines `natHostSubnet = 192.168.128.0/24` and `natSubnet = 192.168.46.0/24`, confirming that those ranges are LocalBox transport/routing networks rather than the workload VM subnet.
+
+Status: **PASS**.
+
+---
+
+## 14. Logical Workload Network Validation
+
+The workload logical network was created through Azure Portal so the field mappings and operational workflow could be validated directly.
+
+Verified configuration:
+
+| Setting | Value |
+| --- | --- |
+| Logical network name | `localbox-vm-lnet-vlan200` |
+| Custom location | `jumpstart` |
+| VM switch | `ConvergedSwitch(compute_management)` |
+| IP assignment | Static |
+| IPv4 address space | `192.168.200.0/24` |
+| Gateway | `192.168.200.1` |
+| DNS | `192.168.1.254` |
+| VLAN | `200` |
+
+These values align with the pinned Microsoft LocalBox configuration and `Configure-VMLogicalNetwork.ps1` source.
+
+Backend validation used:
+
+```powershell
+az stack-hci-vm network lnet show `
+  --resource-group "rg-azlocal-localbox-accreditation-aue" `
+  --name "localbox-vm-lnet-vlan200" `
+  --query "{Name:name,State:properties.provisioningState,Type:properties.networkType,VMSwitch:properties.vmSwitchName,DNS:properties.dhcpOptions.dnsServers,Subnets:properties.subnets}" `
+  --output json
+```
+
+Verified backend state included:
+
+```text
+Provisioning state : Succeeded
+Address prefix      : 192.168.200.0/24
+Gateway             : 192.168.200.1
+DNS                 : 192.168.1.254
+VLAN                : 200
+VM switch           : ConvergedSwitch(compute_management)
+```
+
+The portal workflow left the explicit IP-pool fields blank. The backend subsequently materialized an IP pool spanning the workload subnet. This behavior was observed after creation and should not be confused with a manually entered portal pool.
+
+Status: **PASS**.
+
+---
+
+## 15. Azure Local Marketplace VM Image Validation
+
+A Windows Server 2025 Marketplace image was added through Azure Portal for the first workload VM lifecycle exercise.
+
+Verified selection:
+
+| Setting | Value |
+| --- | --- |
+| Image | `[smalldisk] Windows Server 2025 Datacenter: Azure Edition - Gen2` |
+| Image resource name | `ws2025-azureedition-smalldisk` |
+| OS type | Windows |
+| VM generation | Gen2 |
+| Custom location | `jumpstart` |
+| Storage placement | Choose automatically |
+
+Automatic storage placement was intentionally retained because the lab has no requirement to force a specific storage path. The image can later be inspected to determine the resulting backend placement where exposed by the resource model.
+
+The image operation was monitored independently of the portal spinner using:
+
+```powershell
+az stack-hci-vm image show `
+  --resource-group "rg-azlocal-localbox-accreditation-aue" `
+  --name "ws2025-azureedition-smalldisk" `
+  --query "{State:properties.provisioningState,Progress:properties.status.progressPercentage,DownloadMB:properties.status.downloadStatus.downloadSizeInMB,Operation:properties.status.provisioningStatus.status,ErrorCode:properties.status.errorCode,ErrorMessage:properties.status.errorMessage}" `
+  --output json
+```
+
+Final verified state:
+
+```text
+Progress     : 100
+State        : Succeeded
+Operation    : Succeeded
+ErrorCode    : empty
+ErrorMessage : empty
+```
+
+### LocalBox performance observation
+
+The Marketplace image ingestion took roughly three hours in this nested LocalBox lab. Progress continued throughout the operation and no backend error was reported.
+
+This duration is recorded as a **LocalBox lab observation only**. It must not be represented as a production Azure Local performance benchmark. Production image lifecycle should use controlled, approved, reusable images rather than downloading an image on demand for every VM deployment.
+
+Status: **PASS**.
+
+---
+
+## 16. Current Activity 3 Status
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -381,8 +508,9 @@ Status: **PASS**.
 | Azure Local connectivity | PASS |
 | Azure Portal cluster visibility | PASS |
 | Portal validation evidence | PASS |
-| Azure Local VM lifecycle validation | PENDING |
-| Logical workload networking validation | PENDING |
+| Logical workload networking validation | PASS |
+| Azure Local Marketplace VM image | PASS |
+| Azure Local VM creation and lifecycle validation | PENDING |
 | Azure monitoring and management validation | PENDING |
 | Azure Local update and lifecycle validation | PENDING |
 
@@ -390,13 +518,13 @@ Status: **PASS**.
 
 ## Next Required Step
 
-The LocalBox infrastructure and Azure Local cluster are successfully deployed, connected, and validated in Azure Portal.
+The LocalBox infrastructure, Azure Local cluster, logical workload network, and Marketplace VM image are successfully deployed and validated.
 
-The next implementation work should move to the remaining Accreditation Activity 3 operational outcomes, one at a time:
+The next implementation work should continue one outcome at a time:
 
-1. Azure Local VM creation and lifecycle.
-2. Logical workload networking.
-3. Azure monitoring and management.
-4. Azure Local update and lifecycle validation.
+1. Create the first Azure Local VM using `ws2025-azureedition-smalldisk` and `localbox-vm-lnet-vlan200`.
+2. Validate VM lifecycle operations.
+3. Validate Azure monitoring and management.
+4. Validate Azure Local update and lifecycle operations.
 
 Each outcome should be executed, verified, and recorded before being marked complete.
