@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This runbook provides a clean, reproducible, step-by-step process for deploying Microsoft Azure Arc Jumpstart LocalBox for an Azure Local accreditation or proof-of-concept lab.
+This runbook provides a clean, reproducible process for deploying Microsoft Azure Arc Jumpstart LocalBox and progressing through the validated Azure Local accreditation proof-of-concept workflow.
 
-It is written for an engineer who wants to reproduce the validated lab without maintaining a separate project repository.
+It is written for an engineer who wants to reproduce the lab without relying on undocumented assumptions.
 
 Validated baseline:
 
@@ -17,7 +17,7 @@ Azure Local cluster           localboxcluster
 Microsoft source commit       3f433866757688d926ae6707e9c0041d8e640b82
 ```
 
-Never store subscription IDs, tenant IDs, service-principal object IDs, passwords, tokens, or credentials in public documentation.
+Never store subscription IDs, tenant IDs, service-principal object IDs, passwords, tokens, credentials, or unsanitized screenshots in public documentation.
 
 ---
 
@@ -45,23 +45,13 @@ Azure Subscription
             Azure Local Node 2
 ```
 
-### Why this design is used
-
-LocalBox is a lab and sandbox implementation. The outer Azure VM supplies the compute, storage, networking, and nested virtualization capacity required to emulate Azure Local. This allows engineers to perform Azure Local deployment, Azure Arc integration, validation, management, and lifecycle exercises without requiring separate physical Azure Local servers.
-
-This is not the production Azure Local architecture. Production Azure Local runs on supported and validated physical hardware.
+LocalBox is a lab and sandbox implementation. It is not the production Azure Local hardware model. Production Azure Local runs on supported and validated physical hardware.
 
 Microsoft references:
 
-Outer Azure VM definition:
-
 https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/bicep/host/host.bicep
 
-Nested VM configuration:
-
 https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/LocalBox-Config.psd1
-
-Nested Azure Local node creation:
 
 https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/New-LocalBoxCluster.ps1
 
@@ -80,64 +70,45 @@ Az.Accounts 5.5.2
 Az.Resources 10.2.0
 ```
 
-Install PowerShell 7 if required:
+Verify:
 
 ```powershell
-winget install --id Microsoft.PowerShell --source winget
-```
-
-Open PowerShell 7 and verify:
-
-```powershell
-pwsh
 $PSVersionTable.PSVersion
-```
-
-Verify Git and Azure CLI:
-
-```powershell
 git --version
 az version
-```
-
-Install Bicep:
-
-```powershell
-az bicep install
 az bicep version
 ```
 
-Install or update `Az.Resources`:
+Operational Azure Local validation also requires these Azure CLI extensions:
+
+```text
+customlocation
+stack-hci-vm
+```
+
+Install explicitly when required:
 
 ```powershell
-Install-Module Az.Resources `
-    -Scope CurrentUser `
-    -Repository PSGallery `
-    -Force
-
-Get-Module -ListAvailable Az.Resources |
-    Sort-Object Version -Descending |
-    Select-Object -First 1 Name,Version,Path
+az extension add --name customlocation
+az extension add --name stack-hci-vm
 ```
+
+The pinned Microsoft `Configure-VMLogicalNetwork.ps1` also installs both extensions before performing Azure Local workload-network operations.
 
 ---
 
-## 3. Clone the Official Microsoft LocalBox Source
+## 3. Clone and Pin the Official Microsoft Source
 
 ```powershell
 Set-Location "C:\Projects"
-
 git clone https://github.com/microsoft/azure_arc.git
-
 Set-Location "C:\Projects\azure_arc"
-
 git checkout 3f433866757688d926ae6707e9c0041d8e640b82
-
 git status
 git rev-parse HEAD
 ```
 
-Expected commit:
+Required commit:
 
 ```text
 3f433866757688d926ae6707e9c0041d8e640b82
@@ -149,13 +120,11 @@ The LocalBox Bicep directory is:
 C:\Projects\azure_arc\azure_jumpstart_localbox\bicep
 ```
 
-Do not copy only `main.bicep` to another directory. LocalBox is a multi-module Bicep project and depends on the relative `host`, `mgmt`, `network`, and supporting folder structure.
+Do not copy only `main.bicep` to another directory. LocalBox is a multi-module project with relative module dependencies.
 
 ---
 
 ## 4. Authenticate to Azure
-
-Azure CLI:
 
 ```powershell
 az login
@@ -166,32 +135,20 @@ Verify without exposing IDs:
 
 ```powershell
 az account show `
-    --query "{Subscription:name,State:state,IsDefault:isDefault}" `
-    --output table
+  --query "{Subscription:name,State:state,IsDefault:isDefault}" `
+  --output table
 ```
 
-Azure PowerShell:
+For Azure PowerShell operations:
 
 ```powershell
 Disable-AzContextAutosave -Scope Process | Out-Null
 Connect-AzAccount
 ```
 
-Verify:
-
-```powershell
-$ctx = Get-AzContext
-Write-Host "Account present:" ($null -ne $ctx.Account)
-Write-Host "Subscription:" $ctx.Subscription.Name
-Write-Host "Tenant present:" ($null -ne $ctx.Tenant.Id)
-Write-Host "Environment:" $ctx.Environment.Name
-```
-
 ---
 
-## 5. Verify Mandatory Resource Providers Before Deployment
-
-Do this before Azure Local validation.
+## 5. Verify Mandatory Resource Providers
 
 ```powershell
 $providers = @(
@@ -210,37 +167,21 @@ foreach ($provider in $providers) {
         --namespace $provider `
         --query "registrationState" `
         --output tsv
-
     Write-Host "$provider : $state"
 }
 ```
 
-Every mandatory provider should be:
+Every mandatory provider should report:
 
 ```text
 Registered
 ```
 
-If required, request registration:
-
-```powershell
-az provider register --namespace Microsoft.HybridContainerService
-az provider register --namespace Microsoft.EdgeMarketplace
-```
-
-Then continue checking until both show `Registered`.
-
-### Why this check matters
-
-LocalBox can request missing provider registration automatically, but Azure provider registration is asynchronous. The LocalBox polling window may finish before registration has propagated. The Azure Local Environment Validator can then correctly fail Arc Integration readiness.
-
-Pre-registering and verifying these providers avoids that failure.
+LocalBox can request missing registration automatically, but registration is asynchronous. Verify readiness before cluster validation instead of depending only on the LocalBox polling window.
 
 ---
 
-## 6. Use the Australia East Configuration
-
-Validated non-secret values:
+## 6. Use the Validated Australia East Configuration
 
 | Parameter | Value |
 | --- | --- |
@@ -256,11 +197,7 @@ Validated non-secret values:
 | VM auto-logon | `true` |
 | Runtime source | exact pinned Microsoft commit |
 
-Use the exact commit as the LocalBox runtime `githubBranch` value:
-
-```text
-3f433866757688d926ae6707e9c0041d8e640b82
-```
+Use the exact commit as the LocalBox runtime `githubBranch` value.
 
 ---
 
@@ -268,78 +205,40 @@ Use the exact commit as the LocalBox runtime `githubBranch` value:
 
 ```powershell
 az group create `
-    --name "rg-azlocal-localbox-accreditation-aue" `
-    --location "australiaeast"
+  --name "rg-azlocal-localbox-accreditation-aue" `
+  --location "australiaeast"
 ```
 
 Verify:
 
 ```powershell
 az group show `
-    --name "rg-azlocal-localbox-accreditation-aue" `
-    --query "{Name:name,Location:location,State:properties.provisioningState}" `
-    --output table
+  --name "rg-azlocal-localbox-accreditation-aue" `
+  --query "{Name:name,Location:location,State:properties.provisioningState}" `
+  --output table
 ```
 
 ---
 
 ## 8. Prepare Secure Runtime Inputs
 
-Retrieve the tenant ID and Microsoft.AzureStackHCI resource-provider object ID from the authenticated Azure context without printing or storing them in public evidence.
+Retrieve sensitive IDs only into process memory and do not print them into public evidence.
 
 Example:
 
 ```powershell
 $tenantId = az account show --query tenantId -o tsv
-
-$spnProviderId = az ad sp list `
-    --filter "appId eq '1412d89f-b8a8-4111-b4fd-e82905cbd85d'" `
-    --query "[0].id" `
-    -o tsv
 ```
 
-Capture the LocalBox administrator password securely:
-
-```powershell
-$localBoxPassword = Read-Host "Enter LocalBox Windows administrator password" -AsSecureString
-```
-
-Do not print or save the password.
+Capture passwords securely and do not save or print them.
 
 ---
 
-## 9. Validate the LocalBox ARM Request
+## 9. Validate and Deploy LocalBox
 
-Use the official `main.bicep` and the validated parameter set with `Test-AzResourceGroupDeployment` before creating billable resources.
+Use the official Microsoft Bicep structure and the validated parameters.
 
-A diagnostic named:
-
-```text
-NestedDeploymentShortCircuited
-```
-
-can appear because the nested host module depends on outputs from earlier modules, such as the staging storage account and subnet.
-
-Treat a successful top-level validation with this documented nested-evaluation limitation as:
-
-```text
-PASS WITH DOCUMENTED VALIDATION LIMITATION
-```
-
-It is not full execution validation of the nested host deployment.
-
----
-
-## 10. Deploy the LocalBox Host
-
-Run the official Microsoft LocalBox Bicep deployment with:
-
-```text
-location                    australiaeast
-azureLocalInstanceLocation  australiaeast
-vmSize                      Standard_E32s_v5
-githubBranch                exact pinned commit
-```
+A top-level ARM validation can report a nested-evaluation diagnostic such as `NestedDeploymentShortCircuited` when outputs from earlier modules are not yet available. Do not treat that diagnostic as full nested execution validation.
 
 Successful host deployment creates resources including:
 
@@ -360,61 +259,44 @@ Do not stop or deallocate `LocalBox-Client` while LocalBox automation is running
 
 ---
 
-## 11. Verify Bootstrap and Hyper-V
+## 10. Verify Bootstrap and Hyper-V
 
-Read-only guest check:
-
-```powershell
-az vm run-command invoke `
-    --resource-group "rg-azlocal-localbox-accreditation-aue" `
-    --name "LocalBox-Client" `
-    --command-id RunPowerShellScript `
-    --scripts "Write-Output '=== LAST BOOT TIME ==='; (Get-CimInstance Win32_OperatingSystem).LastBootUpTime; Write-Output '=== HYPER-V STATE ==='; Get-WindowsFeature Hyper-V | Select-Object Name,InstallState | Format-Table -AutoSize; Write-Output '=== LOCALBOX SCHEDULED TASK ==='; Get-ScheduledTask -TaskName 'LocalBoxLogonScript' -ErrorAction SilentlyContinue | Select-Object TaskName,State | Format-Table -AutoSize; Write-Output '=== RECENT LOCALBOX LOGS ==='; Get-ChildItem 'C:\LocalBox\Logs' -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 15 Name,Length,LastWriteTime | Format-Table -AutoSize" `
-    --output json
-```
-
-Expected during build:
+Useful guest checks include Hyper-V state, LocalBox scheduled-task state, and logs under:
 
 ```text
-Hyper-V : Installed
-LocalBoxLogonScript : Running
+C:\LocalBox\Logs
 ```
 
-Useful logs:
+Important logs include:
 
 ```text
-C:\LocalBox\Logs\Bootstrap.log
-C:\LocalBox\Logs\LocalBoxLogonScript.log
-C:\LocalBox\Logs\New-LocalBoxCluster.log
+Bootstrap.log
+LocalBoxLogonScript.log
+New-LocalBoxCluster.log
+```
+
+Expected build readiness:
+
+```text
+Hyper-V              Installed
+LocalBoxLogonScript  Running
 ```
 
 ---
 
-## 12. Monitor the Nested LocalBox Build
+## 11. Monitor the Nested LocalBox Build
 
-Microsoft automation:
+The pinned `New-LocalBoxCluster.ps1` workflow performs the major LocalBox build stages, including nested VM creation, networking and storage configuration, Azure Local cloud deployment preparation, validation, and final deployment.
+
+Pinned source:
 
 https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/New-LocalBoxCluster.ps1
 
-The workflow performs eleven high-level stages:
-
-1. Download VHDs.
-2. Prepare the virtualization host.
-3. Create the management VM.
-4. Create Azure Local node VMs.
-5. Start nested VMs.
-6. Configure networking and storage.
-7. Build router VM.
-8. Build domain controller VM.
-9. Prepare Azure Local cloud deployment.
-10. Validate Azure Local cluster deployment.
-11. Deploy Azure Local cluster.
-
 ---
 
-## 13. Validate the Azure Local Cluster
+## 12. Validate the Azure Local Cluster
 
-The validation deployment is:
+Validation deployment:
 
 ```text
 localcluster-validate
@@ -424,89 +306,45 @@ Check state:
 
 ```powershell
 az deployment group show `
-    --resource-group "rg-azlocal-localbox-accreditation-aue" `
-    --name "localcluster-validate" `
-    --query "{Name:name,State:properties.provisioningState,Timestamp:properties.timestamp,Error:properties.error}" `
-    --output json
-```
-
-If validation fails, inspect operations:
-
-```powershell
-az deployment operation group list `
-    --resource-group "rg-azlocal-localbox-accreditation-aue" `
-    --name "localcluster-validate" `
-    --query "[?properties.provisioningState=='Failed'].{Resource:properties.targetResource.resourceName,Type:properties.targetResource.resourceType,State:properties.provisioningState,StatusMessage:properties.statusMessage}" `
-    --output json
-```
-
-If provider readiness was the only blocker and the LocalBox environment is otherwise healthy, correct the provider registration and retry only validation, not the complete LocalBox deployment.
-
-Validated retry command:
-
-```powershell
-az vm run-command invoke `
-    --resource-group "rg-azlocal-localbox-accreditation-aue" `
-    --name "LocalBox-Client" `
-    --command-id RunPowerShellScript `
-    --scripts "Import-Module Az.Resources; Connect-AzAccount -Identity | Out-Null; New-AzResourceGroupDeployment -Name 'localcluster-validate' -ResourceGroupName 'rg-azlocal-localbox-accreditation-aue' -TemplateFile 'C:\LocalBox\azlocal.json' -TemplateParameterFile 'C:\LocalBox\azlocal.parameters.json' -ErrorAction Stop | Select-Object DeploymentName,ProvisioningState,Timestamp | Format-List" `
-    --output json
+  --resource-group "rg-azlocal-localbox-accreditation-aue" `
+  --name "localcluster-validate" `
+  --query "{Name:name,State:properties.provisioningState,Error:properties.error}" `
+  --output json
 ```
 
 Required result:
 
 ```text
-localcluster-validate : Succeeded
+State : Succeeded
 ```
+
+If provider readiness is the only blocker, correct the provider state and retry the narrow validation step rather than redeploying the complete lab.
 
 ---
 
-## 14. Deploy the Azure Local Cluster
+## 13. Deploy and Monitor the Azure Local Cluster
 
-After validation succeeds, deploy the cluster using the generated LocalBox ARM files:
-
-```powershell
-az vm run-command invoke `
-    --resource-group "rg-azlocal-localbox-accreditation-aue" `
-    --name "LocalBox-Client" `
-    --command-id RunPowerShellScript `
-    --scripts "Import-Module Az.Resources; Connect-AzAccount -Identity | Out-Null; New-AzResourceGroupDeployment -Name 'localcluster-deploy' -ResourceGroupName 'rg-azlocal-localbox-accreditation-aue' -TemplateFile 'C:\LocalBox\azlocal.json' -DeploymentMode 'Deploy' -TemplateParameterFile 'C:\LocalBox\azlocal.parameters.json' -ErrorAction Stop | Select-Object DeploymentName,ProvisioningState,Timestamp | Format-List" `
-    --output json
-```
-
-### Important long-running deployment behavior
-
-The Azure Local cluster deployment can run for hours. In the validated lab, it completed in approximately:
+Cluster deployment:
 
 ```text
-2 hours 19 minutes
+localcluster-deploy
 ```
 
-The synchronous Azure VM Run Command wrapper timed out before the deployment completed. This did not mean the Azure Local deployment failed.
+The validated lab deployment completed in approximately 2 hours 19 minutes.
 
-Once the ARM deployment has been started, use Azure Resource Manager as the authoritative monitor:
+A synchronous VM Run Command wrapper can time out while the ARM deployment continues. Monitor the authoritative ARM deployment:
 
 ```powershell
 az deployment group show `
-    --resource-group "rg-azlocal-localbox-accreditation-aue" `
-    --name "localcluster-deploy" `
-    --query "{State:properties.provisioningState,Duration:properties.duration,Error:properties.error}" `
-    --output json
+  --resource-group "rg-azlocal-localbox-accreditation-aue" `
+  --name "localcluster-deploy" `
+  --query "{State:properties.provisioningState,Duration:properties.duration,Error:properties.error}" `
+  --output json
 ```
 
-Inspect non-succeeded child operations if needed:
+Do not rerun the deployment only because the initiating shell wrapper timed out.
 
-```powershell
-az deployment operation group list `
-    --resource-group "rg-azlocal-localbox-accreditation-aue" `
-    --name "localcluster-deploy" `
-    --query "[?properties.provisioningState!='Succeeded'].{Resource:properties.targetResource.resourceName,Type:properties.targetResource.resourceType,State:properties.provisioningState,StatusMessage:properties.statusMessage}" `
-    --output json
-```
-
-Do not rerun the deployment simply because the initiating Run Command timed out.
-
-Required final ARM result:
+Required final state:
 
 ```text
 State : Succeeded
@@ -515,52 +353,15 @@ Error : null
 
 ---
 
-## 15. Inspect Detailed Azure Local Deployment Status
-
-For deeper deployment progress, query the nested Azure Local deployment settings directly through ARM REST.
-
-First obtain the current subscription ID in process memory:
-
-```powershell
-$subscriptionId = az account show --query id --output tsv
-```
-
-Use the stable API version validated for the resource type:
-
-```powershell
-$uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/rg-azlocal-localbox-accreditation-aue/providers/Microsoft.AzureStackHCI/clusters/localboxcluster/deploymentSettings/default?api-version=2026-04-30"
-
-az rest `
-    --method get `
-    --uri $uri `
-    --query "properties" `
-    --output json
-```
-
-Successful deployment should report values such as:
-
-```text
-provisioningState       : Succeeded
-deploymentMode          : Deploy
-deploymentStatus.status : Success
-validationStatus.status : Success
-```
-
-This detailed status also shows the individual deployment and validation steps.
-
----
-
-## 16. Verify Final Azure Local Connectivity
-
-After deployment succeeds:
+## 14. Verify Azure Local Connectivity
 
 ```powershell
 az resource show `
-    --resource-group "rg-azlocal-localbox-accreditation-aue" `
-    --resource-type "Microsoft.AzureStackHCI/clusters" `
-    --name "localboxcluster" `
-    --query "{ProvisioningState:properties.provisioningState,ConnectivityStatus:properties.connectivityStatus,Status:properties.status}" `
-    --output json
+  --resource-group "rg-azlocal-localbox-accreditation-aue" `
+  --resource-type "Microsoft.AzureStackHCI/clusters" `
+  --name "localboxcluster" `
+  --query "{ProvisioningState:properties.provisioningState,ConnectivityStatus:properties.connectivityStatus,Status:properties.status}" `
+  --output json
 ```
 
 Validated end state:
@@ -571,51 +372,214 @@ ConnectivityStatus : Connected
 Status             : ConnectedRecently
 ```
 
-Do not treat ARM provisioning success alone as operational completion. `ConnectivityStatus = Connected` is a separate completion gate.
+Do not treat provisioning success alone as operational completion. Connectivity is a separate gate.
 
 ---
 
-## 17. Verify the Two Azure Local Nodes
+## 15. Understand the LocalBox Network Layers Before Creating Workloads
 
-Detailed deployment settings should contain Arc node resource IDs for:
+The validated network map is:
+
+| Network | Purpose |
+| --- | --- |
+| `172.16.1.0/24` | Outer Azure subnet for `LocalBox-Client` |
+| `192.168.1.0/24` | Azure Local infrastructure/management network |
+| `192.168.128.0/24` | LocalBox host NAT transport network |
+| `192.168.46.0/24` | LocalBox NAT/router routing subnet |
+| `192.168.200.0/24` | Azure Local workload VM network, VLAN 200 |
+
+The pinned Microsoft configuration explicitly defines:
 
 ```text
-AzLHOST1
-AzLHOST2
+natHostSubnet = 192.168.128.0/24
+natSubnet     = 192.168.46.0/24
+vmGateway     = 192.168.200.1
+vmIpPrefix    = 192.168.200.0/24
+vmDNS         = 192.168.1.254
+vmVLAN        = 200
 ```
 
-These are the two Azure Local nodes projected through Azure Arc / Hybrid Compute. They are nested inside `LocalBox-Client`, not separate top-level Azure IaaS VMs.
+Do not use the NAT transport or infrastructure subnet as the workload VM network.
 
 ---
 
-## 18. Microsoft Validation Tests
+## 16. Discover the Azure Local Custom Location
 
-Pinned test source:
+```powershell
+az customlocation list `
+  --resource-group "rg-azlocal-localbox-accreditation-aue" `
+  --output table
+```
 
-https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/tests/Invoke-Test.ps1
+Validated custom location:
 
-The Microsoft test workflow waits for deployment completion and Azure Local connectivity before running Pester validation.
-
-The connectivity check uses a default 60-minute timeout and checks every 30 seconds.
+```text
+jumpstart
+```
 
 ---
 
-## 19. Troubleshooting Rules
+## 17. Verify Workload Storage Paths
+
+Before VM lifecycle work, verify the Azure Local storage paths using the `stack-hci-vm` extension.
+
+The validated lab contained two healthy workload storage paths under `C:\ClusterStorage`.
+
+For this accreditation workflow, storage placement can be left automatic unless a specific workload requirement requires explicit affinity or storage selection.
+
+---
+
+## 18. Create the Workload Logical Network
+
+Pinned Microsoft automation source:
+
+https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/Configure-VMLogicalNetwork.ps1
+
+The official LocalBox values are:
+
+```text
+Name       localbox-vm-lnet-vlan200
+VM switch  ConvergedSwitch(compute_management)
+Prefix     192.168.200.0/24
+Gateway    192.168.200.1
+DNS        192.168.1.254
+VLAN       200
+Allocation static
+```
+
+### GUI-first accreditation workflow
+
+In Azure Portal, open the deployed Azure Local system and create a logical network using those values.
+
+The validated lab left the explicit IP-pool fields blank because the pinned Microsoft script does not specify a manual pool.
+
+### CLI verification
+
+```powershell
+az stack-hci-vm network lnet show `
+  --resource-group "rg-azlocal-localbox-accreditation-aue" `
+  --name "localbox-vm-lnet-vlan200" `
+  --query "{Name:name,State:properties.provisioningState,Type:properties.networkType,VMSwitch:properties.vmSwitchName,DNS:properties.dhcpOptions.dnsServers,Subnets:properties.subnets}" `
+  --output json
+```
+
+Validated state:
+
+```text
+ProvisioningState : Succeeded
+Prefix            : 192.168.200.0/24
+Gateway           : 192.168.200.1
+DNS               : 192.168.1.254
+VLAN              : 200
+```
+
+Backend inspection showed that the service materialized an IP pool spanning the workload subnet even though an explicit portal pool was not entered.
+
+Status: **PASS**.
+
+---
+
+## 19. Add a Marketplace VM Image
+
+For the first Windows workload, the validated portal selection was:
+
+```text
+[smalldisk] Windows Server 2025 Datacenter: Azure Edition - Gen2
+```
+
+Image resource name:
+
+```text
+ws2025-azureedition-smalldisk
+```
+
+Use:
+
+```text
+Custom location : jumpstart
+Storage path    : Choose automatically
+OS type         : Windows
+VM generation   : Gen2
+```
+
+Automatic storage placement is appropriate for this lab because there is no requirement to force a specific storage path.
+
+### Monitor backend progress
+
+Do not depend only on the portal spinner. Use:
+
+```powershell
+az stack-hci-vm image show `
+  --resource-group "rg-azlocal-localbox-accreditation-aue" `
+  --name "ws2025-azureedition-smalldisk" `
+  --query "{State:properties.provisioningState,Progress:properties.status.progressPercentage,DownloadMB:properties.status.downloadStatus.downloadSizeInMB,Operation:properties.status.provisioningStatus.status,ErrorCode:properties.status.errorCode,ErrorMessage:properties.status.errorMessage}" `
+  --output json
+```
+
+Validated final result:
+
+```text
+Progress     : 100
+State        : Succeeded
+Operation    : Succeeded
+ErrorCode    : empty
+ErrorMessage : empty
+```
+
+### Long-running image observation
+
+The Windows Server 2025 Marketplace image took roughly three hours to ingest in the nested LocalBox lab. Progress continued and no backend error was reported.
+
+Treat this as a LocalBox lab observation only, not a production Azure Local performance benchmark.
+
+Production image operations should maintain approved, reusable, versioned gold images rather than make image ingestion an on-demand prerequisite for every VM deployment.
+
+Status: **PASS**.
+
+---
+
+## 20. Next Step: Create the First Azure Local VM
+
+At this checkpoint the required prerequisites are ready:
+
+```text
+Azure Local cluster                 PASS
+Azure connectivity                  PASS
+Custom location                     PASS
+Workload storage                    PASS
+Workload logical network            PASS
+Windows Server 2025 VM image        PASS
+```
+
+The next controlled step is to create one Azure Local VM through Azure Portal using:
+
+```text
+Image    ws2025-azureedition-smalldisk
+Network  localbox-vm-lnet-vlan200
+```
+
+After VM creation, validate backend provisioning and then exercise start, stop, restart, and management operations before marking VM lifecycle complete.
+
+---
+
+## 21. Troubleshooting Rules
 
 1. Verify provider registration before cluster validation.
-2. Do not assume `ProvisioningState = Succeeded` means Azure Local is operationally connected.
-3. Check `ConnectivityStatus` separately.
-4. Inspect ARM deployment operations before changing configuration.
-5. A VM Run Command timeout is not automatically an Azure Local deployment failure.
-6. Monitor long-running deployment state through Azure Resource Manager.
-7. Do not restart, stop, or deallocate `LocalBox-Client` during active LocalBox automation.
-8. Do not rerun the complete LocalBox deployment when a narrower validation retry is sufficient.
-9. Keep Microsoft source pinned and unmodified unless a justified change is explicitly required.
-10. Keep secrets and sensitive IDs out of screenshots, scripts, repositories, and evidence.
+2. Check `ConnectivityStatus` separately from `ProvisioningState`.
+3. Inspect ARM operations before changing configuration.
+4. A VM Run Command timeout is not automatically an Azure Local deployment failure.
+5. Do not stop or deallocate `LocalBox-Client` during active LocalBox automation.
+6. Keep Microsoft source pinned and unmodified unless a justified change is explicitly required.
+7. Keep secrets and sensitive IDs out of public evidence.
+8. Treat `customlocation` and `stack-hci-vm` as explicit workstation dependencies.
+9. Distinguish outer Azure, infrastructure, NAT transport, routing, and workload networks.
+10. Use the pinned LocalBox configuration as the source of truth for LocalBox-specific workload network values.
+11. If a Marketplace image shows increasing progress and no error, do not delete or redeploy it simply because ingestion is slow.
+12. Do not use nested LocalBox performance as a production Azure Local performance benchmark.
 
 ---
 
-## 20. Quick Reference URLs
+## 22. Quick Reference URLs
 
 Microsoft Azure Arc Jumpstart repository:
 
@@ -633,9 +597,9 @@ Pinned LocalBox configuration:
 
 https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/LocalBox-Config.psd1
 
-Pinned LocalBox validation tests:
+Pinned workload logical-network automation:
 
-https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/tests/Invoke-Test.ps1
+https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/PowerShell/Configure-VMLogicalNetwork.ps1
 
 ---
 
@@ -656,11 +620,11 @@ localcluster-validate                Succeeded
 localcluster-deploy                  Succeeded
 Azure Local cluster connectivity     Connected
 Azure Local cluster status           ConnectedRecently
+customlocation extension             PASS
+stack-hci-vm extension               PASS
+Logical workload network             PASS
+Marketplace VM image                 PASS
+Azure Local VM lifecycle             PENDING
+Monitoring and management            PENDING
+Update and lifecycle validation      PENDING
 ```
-
-Remaining accreditation Activity 3 operational exercises should now continue one at a time:
-
-1. Azure Local VM creation and lifecycle.
-2. Logical workload networking.
-3. Azure monitoring and management.
-4. Azure Local update and lifecycle validation.
