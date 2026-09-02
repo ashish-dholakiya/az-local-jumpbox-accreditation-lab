@@ -32,12 +32,30 @@ Sensitive identifiers and secrets are intentionally excluded.
 | PowerShell 7.6.5 | Controlled PowerShell execution environment | PASS |
 | Git 2.55.0.windows.5 | Clone and pin Microsoft source | PASS |
 | Azure CLI 2.89.1 | Authentication, provider checks, resource and deployment queries | PASS |
+| Azure CLI `customlocation` extension | Required by `az customlocation` commands used to discover and validate the Azure Local custom location before VM lifecycle work | DISCOVERED / INSTALLING |
 | Bicep CLI 0.46.1 | LocalBox Bicep deployment workflow | PASS |
 | Az.Accounts 5.5.2 | Azure PowerShell authentication | PASS |
 | Az.Resources 10.2.0 | ARM validation and deployment operations | PASS |
 | Separate Microsoft repository | Keeps official source isolated from project documentation | PASS |
 | Exact Microsoft commit pin | Prevents source drift | PASS |
 | Runtime `githubBranch` pinned to exact commit | Prevents runtime artifact drift | PASS |
+
+### Azure CLI `customlocation` extension behavior
+
+The first execution of an `az customlocation` command on a workstation where the extension is not already installed can produce an interactive prompt similar to:
+
+```text
+The command requires the extension customlocation.
+Do you want to install it now? (Y/n)
+```
+
+Azure CLI can then search for and install the required extension before continuing the original command.
+
+This is a **local Azure CLI tooling change only**. Installing the extension does not create, modify, or delete Azure Local or Azure subscription resources.
+
+Azure CLI may also display guidance about dynamic extension installation and preview-version behavior. For unattended automation, extension installation behavior should be configured deliberately rather than relying on an interactive prompt. For this accreditation lab, the interactive installation was accepted when first encountered, and the resulting extension state should be verified after installation completes.
+
+This dependency is important for repeatability because a fresh workstation can otherwise appear to fail at the custom-location discovery step even though the Azure Local environment itself is healthy.
 
 ---
 
@@ -256,6 +274,7 @@ The LocalBox administrator password is runtime-only input.
 | Australia East region | PASS |
 | VM SKU | PASS |
 | Workstation tooling | PASS |
+| Azure CLI `customlocation` extension | DISCOVERED / INSTALLING |
 | Microsoft source pinning | PASS |
 | Runtime source pinning | PASS |
 | Mandatory resource providers | PASS |
@@ -286,3 +305,4 @@ Key presentation lessons:
 3. Monitor long-running Azure Local deployments through Azure Resource Manager rather than only through the initiating shell command.
 4. Treat `ProvisioningState = Succeeded` and `ConnectivityStatus = Connected` as separate completion gates.
 5. Keep Microsoft source pinned and secrets out of public evidence.
+6. Treat Azure CLI extensions such as `customlocation` as explicit workstation dependencies for repeatable operational validation.
