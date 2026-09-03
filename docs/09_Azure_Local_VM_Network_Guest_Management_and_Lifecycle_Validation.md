@@ -248,9 +248,9 @@ Status: **PASS**.
 | VM stop | PASS |
 | VM start | PASS |
 | VM restart | PASS |
-| Azure Local VM lifecycle | PASS |
-| Azure monitoring and management validation | PENDING |
-| Azure Local update / lifecycle validation | PENDING |
+| Azure Local workload VM start/stop/restart | PASS |
+| Azure monitoring and management validation | NEXT / pending validation |
+| Azure Local platform update / lifecycle validation | PENDING |
 
 ---
 
@@ -262,14 +262,15 @@ The next controlled Activity 3 task is:
 Azure monitoring and management validation
 ```
 
-Recommended next sequence:
+Next sequence, synchronized on 3 September 2026 after the [lab recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md):
 
 ```text
-1. Review Azure Local cluster health and alerts.
-2. Review workload VM management/health visibility.
-3. Confirm Azure Arc connectivity and available management operations.
-4. Capture only sanitized evidence required for accreditation.
-5. Then validate Azure Local update and lifecycle management.
+1. Verify the AzureEdgeTelemetryAndDiagnostics extension prerequisite.
+2. Validate Azure-based monitoring and management against the required evidence scope.
+3. Record only verified results and sanitized evidence.
+4. Then validate Azure Local platform update and lifecycle management.
 ```
+
+Completed workload VM start/stop/restart is separate from the pending Azure Local platform update/lifecycle activity.
 
 Do not expand scope beyond the accreditation requirements unless the additional work is explicitly recorded as further understanding rather than accreditation evidence.

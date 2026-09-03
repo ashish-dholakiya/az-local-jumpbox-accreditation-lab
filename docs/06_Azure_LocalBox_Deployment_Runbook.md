@@ -538,9 +538,9 @@ Status: **PASS**.
 
 ---
 
-## 20. Next Step: Create the First Azure Local VM
+## 20. Create and Validate the First Azure Local VM
 
-At this checkpoint the required prerequisites are ready:
+For a fresh lab, complete these prerequisites before creating the first workload VM:
 
 ```text
 Azure Local cluster                 PASS
@@ -551,7 +551,7 @@ Workload logical network            PASS
 Windows Server 2025 VM image        PASS
 ```
 
-The next controlled step is to create one Azure Local VM through Azure Portal using:
+For a fresh lab, create one Azure Local VM through Azure Portal using:
 
 ```text
 Image    ws2025-azureedition-smalldisk
@@ -559,6 +559,8 @@ Network  localbox-vm-lnet-vlan200
 ```
 
 After VM creation, validate backend provisioning and then exercise start, stop, restart, and management operations before marking VM lifecycle complete.
+
+**Existing lab: complete.** Workload VM creation, NIC/IP, guest management, and start/stop/restart are verified in [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). This section remains a deployment procedure, not the current next task. Resume monitoring prerequisite verification for `AzureEdgeTelemetryAndDiagnostics`, followed by the required Azure monitoring/management evidence and then Azure Local platform update/lifecycle validation.
 
 ---
 
@@ -729,6 +731,10 @@ https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e64
 
 ## Current Verified Checkpoint
 
+Status synchronized on **3 September 2026** with the [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). PASS refers to the recorded validation; it does not represent a new test in this documentation update. Workload VM start/stop/restart is complete; Azure Local platform update/lifecycle validation is a separate pending activity.
+
+The [recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md) additionally records both nodes Up, Cloud Witness and Cluster Group Online, and all three CSVs Online. Permanent governance resolution remains pending.
+
 ```text
 Workstation tooling                  PASS
 Official Microsoft source cloned     PASS
@@ -748,7 +754,12 @@ customlocation extension             PASS
 stack-hci-vm extension               PASS
 Logical workload network             PASS
 Marketplace VM image                 PASS
-Azure Local VM lifecycle             PENDING
-Monitoring and management            PENDING
-Update and lifecycle validation      PENDING
+Workload VM creation                 PASS
+Workload NIC/IP validation           PASS
+Guest management / Arc validation    PASS
+Workload VM stop/start/restart        PASS
+Azure monitoring and management      NEXT / pending validation
+Azure Local platform update/lifecycle PENDING
 ```
+
+Next controlled task: verify the `AzureEdgeTelemetryAndDiagnostics` extension prerequisite. Do not rerun completed workload VM lifecycle validation solely to advance this checkpoint.

@@ -492,6 +492,8 @@ Status: **PASS**.
 
 ## 16. Current Activity 3 Status
 
+Status synchronized on **3 September 2026** with the [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). PASS refers to the recorded validation; it does not represent a new test in this documentation update. Workload VM start/stop/restart is complete; Azure Local platform update/lifecycle validation is a separate pending activity.
+
 | Implementation checkpoint | Status |
 | --- | --- |
 | Azure subscription readiness | PASS |
@@ -510,21 +512,20 @@ Status: **PASS**.
 | Portal validation evidence | PASS |
 | Logical workload networking validation | PASS |
 | Azure Local Marketplace VM image | PASS |
-| Azure Local VM creation and lifecycle validation | PENDING |
-| Azure monitoring and management validation | PENDING |
-| Azure Local update and lifecycle validation | PENDING |
+| Azure Local workload VM creation and start/stop/restart | PASS |
+| Azure monitoring and management validation | NEXT / pending validation |
+| Azure Local platform update and lifecycle validation | PENDING |
 
 ---
 
 ## Next Required Step
 
-The LocalBox infrastructure, Azure Local cluster, logical workload network, and Marketplace VM image are successfully deployed and validated.
+Workload VM creation, NIC/IP, guest management, and start/stop/restart have been verified. See [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and the subsequent [lab recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md).
 
-The next implementation work should continue one outcome at a time:
+Continue one outcome at a time:
 
-1. Create the first Azure Local VM using `ws2025-azureedition-smalldisk` and `localbox-vm-lnet-vlan200`.
-2. Validate VM lifecycle operations.
-3. Validate Azure monitoring and management.
-4. Validate Azure Local update and lifecycle operations.
+1. Verify the `AzureEdgeTelemetryAndDiagnostics` extension prerequisite for Activity 3 monitoring and management.
+2. Validate Azure-based monitoring and management, capturing the required sanitized evidence.
+3. Then validate Azure Local platform update and lifecycle operations.
 
-Each outcome should be executed, verified, and recorded before being marked complete.
+Do not repeat completed VM lifecycle work solely because an earlier deployment section describes it. Each remaining outcome must be executed, verified, and recorded before being marked complete.

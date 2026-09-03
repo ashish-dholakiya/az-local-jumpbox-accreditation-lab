@@ -449,6 +449,8 @@ Do not use LocalBox storage performance as a production benchmark.
 
 ## 18. Current Activity 3 Checkpoint
 
+Status synchronized on **3 September 2026** with the [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). PASS refers to the recorded validation; it does not represent a new test in this documentation update. Workload VM start/stop/restart is complete; Azure Local platform update/lifecycle validation is a separate pending activity.
+
 | Implementation checkpoint | Status |
 | --- | --- |
 | LocalBox host deployment | PASS |
@@ -468,26 +470,18 @@ Do not use LocalBox storage performance as a production benchmark.
 | OS disk format/type/capacity validation | PASS |
 | OS disk to CSV/S2D mapping | PASS |
 | OS disk expansion support path understood | PASS, no resize executed |
-| NIC / workload IP validation | PENDING |
-| Guest-management verification | PENDING |
-| VM lifecycle start/stop/restart | PENDING |
-| Azure monitoring and management validation | PENDING |
-| Azure Local update/lifecycle validation | PENDING |
+| NIC / workload IP validation | PASS |
+| Guest-management verification | PASS |
+| Workload VM lifecycle start/stop/restart | PASS |
+| Azure monitoring and management validation | NEXT / pending validation |
+| Azure Local platform update/lifecycle validation | PENDING |
 
 ---
 
 ## Next Required Step
 
-The next controlled accreditation step is to complete the remaining workload-VM validation before exercising lifecycle actions.
+The subsequent [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) confirms NIC/IP, guest management, and VM stop/start/restart are complete. The [lab recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md) records the later startup and witness recovery.
 
-Recommended sequence:
-
-```text
-1. Verify the VM NIC and assigned workload IP
-2. Verify guest-management / Arc guest state
-3. Exercise stop, start and restart through the supported Azure management plane
-4. Validate final VM state after each lifecycle action
-5. Continue to monitoring/management and Azure Local update lifecycle
-```
+Continue with Activity 3 monitoring and management, starting with the `AzureEdgeTelemetryAndDiagnostics` extension prerequisite. Capture the required monitoring evidence, then proceed to Azure Local platform update/lifecycle validation.
 
 The VM should not be resized or otherwise changed merely to demonstrate capability unless that change is required by the accreditation task.

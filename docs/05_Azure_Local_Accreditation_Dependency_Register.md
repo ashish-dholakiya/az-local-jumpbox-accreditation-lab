@@ -381,6 +381,8 @@ The LocalBox administrator password is runtime-only input.
 
 ## 16. Current Dependency Readiness
 
+Status synchronized on **3 September 2026** with the [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). PASS refers to the recorded validation; it does not represent a new test in this documentation update. Workload VM start/stop/restart is complete; Azure Local platform update/lifecycle validation is a separate pending activity.
+
 | Area | Status |
 | --- | --- |
 | Subscription and access | PASS |
@@ -402,12 +404,14 @@ The LocalBox administrator password is runtime-only input.
 | Logical workload networking | PASS |
 | Workload storage readiness | PASS |
 | Azure Local Marketplace VM image | PASS |
-| Azure Local VM creation and lifecycle | PENDING |
-| Monitoring and management | PENDING |
-| Update and lifecycle validation | PENDING |
+| Azure Local workload VM creation and start/stop/restart | PASS |
+| Azure monitoring and management | NEXT / pending validation |
+| Azure Local platform update and lifecycle validation | PENDING |
 
 ---
 
+
+Next: verify the `AzureEdgeTelemetryAndDiagnostics` extension prerequisite before collecting the remaining monitoring and management evidence.
 
 ### Cloud Witness and storage-access dependencies (3 September 2026)
 
