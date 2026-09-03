@@ -72,3 +72,11 @@ Work should be documented only after it has been executed or verified. Planned w
 ## Status
 
 Customer discovery, architecture design, and Azure subscription readiness have been performed. The current implementation priority is the required Jumpstart / LocalBox proof of concept defined in Activity 3 of the governing source-of-truth document.
+
+## Operational Checkpoint: 3 September 2026
+
+Operator-supplied checks confirm both cluster nodes Up, Cloud Witness and Cluster Group Online, and all three cluster shared volumes Online.
+
+A governance follow-up reminder is scheduled for **14 September 2026 around 09:00 IST**, before the temporary lab waivers expire at **15 September 2026, 00:00 IST**. Permanent governance resolution remains pending.
+
+See [Lab Recovery Checkpoint and Follow-up](docs/10_Lab_Recovery_Checkpoint_and_Follow_Up.md) for the reminder, expiry and next task. Activity 3 monitoring prerequisite verification is next.
