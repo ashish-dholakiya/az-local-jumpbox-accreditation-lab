@@ -175,11 +175,11 @@ Required deliverable:
 
 ## 3. Current Execution Priority
 
-The current priority is:
+As of the operator-evidence checkpoint on **3 September 2026**, Activity 3 execution is complete within the recorded basic monitoring scope, including the solution update and agreed post-update validation. See [the final evidence record](11_Azure_Monitoring_and_Platform_Update_Validation.md).
 
-**Activity 3: Azure Local Proof of Concept using Jumpstart / LocalBox**
+**Current priority: review and finalize accreditation deliverables using the verified PoC evidence.**
 
-Subscription readiness has been completed before starting billable deployment resources. The implementation should now focus only on what is needed to satisfy the Activity 3 outcomes.
+This does not approve the production design or mark all accreditation activities complete. Review the presentation and VMware migration drafts, complete customer-meeting preparation, and obtain the eight written validation questions. Track governance expiry, guest activation and monitoring limitations separately; do not add optional infrastructure work without a scope reason.
 
 Do not expand the lab into unrelated Azure Local features, custom infrastructure engineering, AKS, optional services, or additional IaC work unless a required accreditation outcome depends on it.
 

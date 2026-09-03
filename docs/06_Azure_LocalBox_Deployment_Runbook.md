@@ -560,7 +560,7 @@ Network  localbox-vm-lnet-vlan200
 
 After VM creation, validate backend provisioning and then exercise start, stop, restart, and management operations before marking VM lifecycle complete.
 
-**Existing workload VM stage: complete.** Workload VM creation, NIC/IP, guest management, and start/stop/restart are verified in [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). This section remains a deployment procedure, not the current next task. Basic monitoring has subsequently been verified. Follow section 21.2 and the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) for the platform installation already in progress and its pending completion gates.
+**Existing workload VM stage: complete.** Workload VM creation, NIC/IP, guest management, and start/stop/restart are verified in [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). This section remains a deployment procedure, not the current next task. Basic monitoring has subsequently been verified. Follow section 21.2 and the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) for the completed platform installation and verified post-update evidence.
 
 ---
 
@@ -707,7 +707,7 @@ Record the observed outcome and unresolved causes. Keep permanent governance fol
 
 ### 21.2 Monitor Azure Data and Track Platform Updates
 
-The [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) records the executed sequence and current status. Basic monitoring and system readiness are verified; update preparation completed and installation is IN PROGRESS. This section is a reusable procedure, not an instruction to start another run.
+The [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) records the executed sequence and current status. Basic monitoring, readiness, preparation, installation to 12.2608.1003.9 and the agreed post-update checks are verified. This section is a reusable procedure, not an instruction to start another run.
 
 1. Verify the telemetry extension on both Arc nodes, then inspect actual cluster metrics under Overview > Monitoring. Extension provisioning alone is not proof of data delivery. Separate missing metric values from zero traffic.
 2. For Session expired, reauthenticate the portal session before changing cluster configuration. For heartbeat alerts, inspect timestamps and current connection evidence; User response New is not an independent health result.
@@ -733,6 +733,24 @@ The version filter is specific to this recorded run. Prepared is not Installed. 
 After installation completes, verify the target version, system health, node and storage state, Cloud Witness/quorum, Azure connectivity and workload access. The read-only checks in section 21.1 are reusable; its repair commands are conditional and must not be run simply for validation. Record final evidence before changing the platform lifecycle status to PASS.
 
 References: [portal update workflow](https://learn.microsoft.com/en-us/azure/azure-local/update/azure-update-manager-23h2), [health-check troubleshooting](https://learn.microsoft.com/en-us/azure/azure-local/update/update-troubleshooting-23h2), [update phases](https://learn.microsoft.com/en-us/azure/azure-local/update/update-phases-23h2).
+
+### 21.3 Post-update validation context and guest-access recovery
+
+The completed checkpoint is recorded in [docs/11](11_Azure_Monitoring_and_Platform_Update_Validation.md). Keep these execution contexts distinct:
+
+| Task | Correct location |
+| --- | --- |
+| Get-SolutionUpdateEnvironment, cluster/storage/quorum checks | PowerShell on AzLHOST1 or AzLHOST2; confirm hostname first |
+| Azure resource and Connected Machine Run Command operations | Azure Cloud Shell PowerShell in the correct subscription |
+| Guest console login | Windows Admin Center > cluster > Virtual machines > workload VM > Connect |
+
+Running cluster cmdlets on LocalBox-Client returned CommandNotFound; this was a wrong execution context, not an update failure. Opening a VM's Azure Overview resource is not the same as signing into its Windows guest.
+
+The workload VM's Arc agent was Enabled (connected). A forgotten local guest password was recovered through Azure Arc Run Command: read-only user and administrator-group checks identified the intended account, then a targeted Set-LocalUser operation passed the new value through ProtectedParameter. The operation returned Succeeded and exit code 0. Windows Admin Center VMConnect subsequently displayed the logged-in guest desktop.
+
+For a future recovery, confirm the exact VM and account, authorized administrative access, and any risk to encrypted files or stored credentials. Prompt securely; never hardcode, print, commit or request the password in chat. Do not run the reset again merely to reproduce evidence. The Run command portal blade in this session provided CLI/PowerShell instructions rather than an inline script editor. No VM rebuild, host-account reset or NLA disablement was required.
+
+References: [Azure Arc Run Command and protected inputs](https://learn.microsoft.com/en-us/azure/azure-arc/servers/run-command), [WAC VMConnect](https://learn.microsoft.com/en-us/windows-server/manage/windows-admin-center/use/manage-virtual-machines#manage-a-virtual-machine-through-the-hyper-v-host-vmconnect).
 
 ## 22. Quick Reference URLs
 
@@ -760,7 +778,7 @@ https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e64
 
 ## Current Verified Checkpoint
 
-Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Basic Azure monitoring is verified; system readiness and update preparation passed. Platform update installation is IN PROGRESS; final completion and post-update validation remain pending.
+Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Platform installation to 12.2608.1003.9 and the agreed post-update validation are PASS. Fresh node, CSV, virtual-disk, witness/quorum, guest-login and basic monitoring evidence is recorded in docs/11. This is a point-in-time lab result, not production certification.
 
 The [recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md) additionally records both nodes Up, Cloud Witness and Cluster Group Online, and all three CSVs Online. Permanent governance resolution remains pending.
 
@@ -788,7 +806,8 @@ Workload NIC/IP validation           PASS
 Guest management / Arc validation    PASS
 Workload VM stop/start/restart        PASS
 Azure monitoring and management      PASS (basic scope; see docs/11)
-Azure Local platform update/lifecycle IN PROGRESS; final validation pending
+Azure Local platform update/lifecycle PASS (12.2608.1003.9; see docs/11)
 ```
 
-Next controlled infrastructure task: track the active installation to its final result, then perform the post-update checks in the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). Documentation may proceed during installation. Do not repeat preparation or installation, or mark earlier VM/storage PASS results as post-update evidence.
+Next: review the synchronized evidence and Markdown presentation drafts, then finish accreditation deliverables. No repeat update or VM lifecycle test is needed solely for documentation. Governance expiry, guest Windows activation, network-metric coverage and local repository synchronization remain separately tracked follow-ups.
+

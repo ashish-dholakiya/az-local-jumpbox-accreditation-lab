@@ -71,7 +71,7 @@ Work should be documented only after it has been executed or verified. Planned w
 
 ## Status
 
-Customer discovery, architecture design, and Azure subscription readiness have been performed. The current implementation priority is the required Jumpstart / LocalBox proof of concept defined in Activity 3 of the governing source-of-truth document.
+Customer discovery and architecture baseline content are available; production inputs remain open. Activity 3 lab execution, including the solution update and agreed post-update checks, is complete at the 3 September 2026 operator-evidence checkpoint. The current priority is review and final accreditation deliverables.
 
 ## Accreditation Delivery Status
 
@@ -80,10 +80,10 @@ Status reviewed on **3 September 2026** against [the governing scope](docs/00_Ac
 | Activity | Available evidence or content | Remaining deliverable / status |
 | --- | --- | --- |
 | 1. Discovery | [Assessment and discovery questionnaire](docs/01_Customer_Discovery_and_Assessment.md) | Content available; final concise 1–2-page submission format has not been verified |
-| 2. Architecture | [Architecture baseline](docs/02_Contoso_Azure_Local_Architecture.md) and diagram files under `diagrams/` | Baseline and diagrams available; required 5–10 technical slides not found or confirmed complete |
-| 3. LocalBox PoC | [Walkthrough](docs/04_Azure_LocalBox_Lab_Walkthrough.md), [VM/storage evidence](docs/08_Azure_Local_VM_WAC_Storage_and_Disk_Validation.md), [VM lifecycle evidence](docs/09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md), [recovery checkpoint](docs/10_Lab_Recovery_Checkpoint_and_Follow_Up.md), and [monitoring/update evidence](docs/11_Azure_Monitoring_and_Platform_Update_Validation.md) | IN PROGRESS: basic monitoring verified; platform installation IN PROGRESS; post-update validation pending |
-| 4. VMware migration | High-level migration considerations in the architecture and production-concepts documents | Dedicated strategy covering tooling, dependencies, waves, downtime, validation and rollback not found; PENDING |
-| 5. Executive presentation | Customer and technical source material available | Required 10–15-slide executive deck not found; PENDING |
+| 2. Architecture | [Architecture baseline](docs/02_Contoso_Azure_Local_Architecture.md) and diagram files under `diagrams/` | Baseline and diagrams available; a 10-slide Markdown review draft was delivered separately, not committed here. Final deck/review pending |
+| 3. LocalBox PoC | [Walkthrough](docs/04_Azure_LocalBox_Lab_Walkthrough.md), [VM/storage evidence](docs/08_Azure_Local_VM_WAC_Storage_and_Disk_Validation.md), [VM lifecycle evidence](docs/09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md), [recovery checkpoint](docs/10_Lab_Recovery_Checkpoint_and_Follow_Up.md), and [monitoring/update evidence](docs/11_Azure_Monitoring_and_Platform_Update_Validation.md) | Execution PASS: update 12.2608.1003.9 and agreed post-update checks verified; 10-slide walkthrough draft delivered separately; final presentation review pending |
+| 4. VMware migration | High-level migration considerations in the architecture and production-concepts documents | Dedicated Markdown strategy/rehearsal draft delivered separately, covering tooling, dependencies, waves, downtime, validation and rollback; review/finalization pending. No migration executed |
+| 5. Executive presentation | Customer and technical source material available | 12-slide Markdown review draft delivered separately; final executive deck/review PENDING |
 | 6. Customer meeting preparation | Discovery questions and architecture rationale available as inputs | Dedicated meeting talking points / preparation deliverable not found; PENDING |
 | 7. Knowledge validation | Scope specifies eight written questions | Exact question set and completed answers not found in this repo; PENDING |
 
@@ -95,7 +95,7 @@ Status reviewed on **3 September 2026** against [the governing scope](docs/00_Ac
 - The customer site's count discrepancy remains open: 25 stated, 15 described, 10 undefined. Workload sizing, site placement, network characteristics and approved RPO/RTO are also discovery inputs, not confirmed facts.
 - OS-disk expansion guidance was documented; no resize was executed. Optional production topics in `docs/07` do not add mandatory lab tasks.
 - Permanent governance resolution and laptop repository synchronization remain operational follow-ups, separate from completed cluster recovery.
-- The active infrastructure task is the platform installation from 12.2608.1003.8 to 12.2608.1003.9. System readiness and preparation passed; installation completion and post-update health validation are still pending. Documentation can continue while the run is active.
+- The platform installation from 12.2608.1003.8 to 12.2608.1003.9 is complete. Portal installation Success, backend AppliedSuccessfully / HealthState Success and fresh post-update node, storage, witness/quorum, guest-login and basic monitoring checks are recorded. No infrastructure operation remains active for this update.
 
 ### Documentation completion check
 
@@ -103,8 +103,9 @@ After each verified outcome, update its evidence record, affected dependency/run
 
 ## Operational Checkpoint: 3 September 2026
 
-Earlier operator-supplied recovery checks confirmed both cluster nodes Up, Cloud Witness and Cluster Group Online, and all three cluster shared volumes Online. Subsequent pre-update checks confirmed healthy nodes, CSVs and virtual disks. These are pre-update observations, not post-installation validation.
+Earlier recovery checks remain historical. Fresh post-update evidence independently confirms both nodes Up, three CSVs Online, four virtual disks Healthy/OK, Cloud Witness and Cluster Name Online, witness quorum, no storage jobs returned, Azure Connected status, VM guest login and recent basic metric charts.
 
 A governance follow-up reminder is scheduled for **14 September 2026 around 09:00 IST**, before the temporary lab waivers expire at **15 September 2026, 00:00 IST**. Permanent governance resolution remains pending.
 
-See [Lab Recovery Checkpoint and Follow-up](docs/10_Lab_Recovery_Checkpoint_and_Follow_Up.md) for reminder and expiry details. The current [monitoring and update checkpoint](docs/11_Azure_Monitoring_and_Platform_Update_Validation.md) records basic monitoring PASS, healthy system readiness, completed preparation and installation IN PROGRESS. Do not mark platform lifecycle complete until its final evidence gates pass.
+See [Lab Recovery Checkpoint and Follow-up](docs/10_Lab_Recovery_Checkpoint_and_Follow_Up.md) for reminder and expiry details. The current [monitoring and update checkpoint](docs/11_Azure_Monitoring_and_Platform_Update_Validation.md) records platform lifecycle and agreed post-update validation PASS. Network metrics remain unverified, historical alert closure is not established, and guest Windows activation remains a separate follow-up. Final customer deliverables and overall accreditation acceptance are not yet complete.
+

@@ -381,7 +381,7 @@ The LocalBox administrator password is runtime-only input.
 
 ## 16. Current Dependency Readiness
 
-Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Basic Azure monitoring is verified; system readiness and update preparation passed. Platform update installation is IN PROGRESS; final completion and post-update validation remain pending.
+Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Platform installation to 12.2608.1003.9 and the agreed post-update validation are PASS. Fresh node, CSV, virtual-disk, witness/quorum, guest-login and basic monitoring evidence is recorded in docs/11. This is a point-in-time lab result, not production certification.
 
 | Area | Status |
 | --- | --- |
@@ -406,12 +406,12 @@ Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_
 | Azure Local Marketplace VM image | PASS |
 | Azure Local workload VM creation and start/stop/restart | PASS |
 | Azure monitoring and management | PASS (basic scope; see docs/11) |
-| Azure Local platform update and lifecycle validation | IN PROGRESS; post-update validation pending |
+| Azure Local platform update and lifecycle validation | PASS — 12.2608.1003.9 and post-update checks verified |
 
 ---
 
 
-Next: track the active platform installation, then perform post-update validation. See the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) for the verified monitoring scope and completion gates.
+Next: review final accreditation content. The [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) records installation and post-update PASS; no active installation remains.
 
 ### Monitoring and update dependencies (3 September 2026)
 
@@ -421,9 +421,9 @@ Next: track the active platform installation, then perform post-update validatio
 | Azure monitoring data | CPU, memory and disk graphs verified; network metric values not verified |
 | Fresh system health | Success in PowerShell; Healthy in portal after earlier critical results |
 | Update preparation | 12.2608.1003.9 Prepared; readiness passed with two Informational checks |
-| Installation and post-update health | Installation IN PROGRESS; final version and post-update checks pending |
+| Installation and post-update health | PASS: CurrentVersion 12.2608.1003.9; HealthState Success; State AppliedSuccessfully; agreed post-update checks verified |
 
-Earlier healthy dependencies are point-in-time results. Do not claim post-update health before the active run completes.
+Earlier and post-update checkpoints remain distinct point-in-time results. Post-update VM guest login and basic CPU/memory/disk monitoring are verified; network metrics and guest Windows activation remain follow-ups.
 
 ### Cloud Witness and storage-access dependencies (3 September 2026)
 
@@ -459,3 +459,4 @@ Key presentation lessons:
 7. Distinguish LocalBox transport networks from the Azure Local workload logical network.
 8. Maintain approved, reusable, versioned gold images in production rather than downloading an image for every VM deployment.
 9. Do not use LocalBox image-ingestion timing as a production Azure Local performance benchmark.
+

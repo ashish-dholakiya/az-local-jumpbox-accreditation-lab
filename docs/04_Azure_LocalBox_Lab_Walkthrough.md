@@ -492,7 +492,7 @@ Status: **PASS**.
 
 ## 16. Current Activity 3 Status
 
-Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Basic Azure monitoring is verified; system readiness and update preparation passed. Platform update installation is IN PROGRESS; final completion and post-update validation remain pending.
+Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Platform installation to 12.2608.1003.9 and the agreed post-update validation are PASS. Fresh node, CSV, virtual-disk, witness/quorum, guest-login and basic monitoring evidence is recorded in docs/11. This is a point-in-time lab result, not production certification.
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -514,7 +514,7 @@ Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_
 | Azure Local Marketplace VM image | PASS |
 | Azure Local workload VM creation and start/stop/restart | PASS |
 | Azure monitoring and management validation | PASS (basic scope; see docs/11) |
-| Azure Local platform update and lifecycle validation | IN PROGRESS; post-update validation pending |
+| Azure Local platform update and lifecycle validation | PASS — 12.2608.1003.9 and post-update checks verified |
 
 ---
 
@@ -522,10 +522,12 @@ Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_
 
 Workload VM creation, NIC/IP, guest management, and start/stop/restart have been verified. See [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and the subsequent [lab recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md).
 
-Basic monitoring is verified in the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). The platform update is already installing; do not launch a competing run.
+Platform installation and the agreed post-update checks are now complete in the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md).
 
-1. Track the current installation to a terminal result.
-2. If successful, verify version, nodes, storage, quorum/witness, Azure connectivity, monitoring and workload health.
-3. Record actual post-update results before marking platform lifecycle complete.
+1. Review the lab walkthrough and presentation drafts against the recorded evidence.
+2. Complete final architecture, VMware migration, executive and customer-meeting deliverables.
+3. Obtain the eight written validation questions and complete their answers.
+4. Keep governance expiry, guest activation, network metrics and repository synchronization as separate follow-ups.
 
-Do not repeat completed VM lifecycle work solely because an earlier deployment section describes it. Each remaining outcome must be executed, verified, and recorded before being marked complete.
+The Activity 3 execution evidence is complete within the basic monitoring scope. Final presentation packaging and overall accreditation acceptance are not implied. Do not repeat completed infrastructure operations solely for documentation.
+

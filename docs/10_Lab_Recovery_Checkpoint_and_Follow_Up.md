@@ -60,10 +60,11 @@ This is a sanitized account of operator-supplied evidence. Internal resource/ass
 
 ## Next task
 
-The subsequent [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) records basic monitoring verification, successful fresh system-health checks, completed preparation and platform installation IN PROGRESS. The earlier recovery evidence above is unchanged and does not establish post-update health.
+The subsequent [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) records successful installation of 12.2608.1003.9 and fresh post-update health, witness/quorum, VM login and basic monitoring evidence. The earlier recovery record remains historical; the later checks independently establish the final checkpoint.
 
-Next: track the current installation to completion or a reported failure; then perform the defined post-update checks. Do not restart preparation or perform unrelated cluster mutations while installation is active. Documentation work can continue.
+Next: review final accreditation deliverables and presentation drafts. Guest Windows activation and network-metric coverage remain follow-ups; the governance reminder and waiver expiry are unchanged. A separate forgotten guest-password issue was resolved through authorized Azure Arc Run Command using protected input, followed by successful interactive login. No VM rebuild or cluster-password change was required.
 
 Before local repository work, verify the folder, branch and working-tree state, then synchronize main according to the multi-device SOP. This remote documentation update does not synchronize the operator's laptop.
 
 See [the preceding validation checkpoint](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [the governing accreditation scope](00_Accreditation_Scope_and_Customer_Scenario_Source_of_Truth.md).
+

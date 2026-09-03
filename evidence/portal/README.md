@@ -22,6 +22,7 @@ These screenshots are referenced from `docs/04_Azure_LocalBox_Lab_Walkthrough.md
 
 ## Subsequent monitoring and update evidence
 
-[Monitoring and platform update validation](../../docs/11_Azure_Monitoring_and_Platform_Update_Validation.md) is a sanitized text record of operator-supplied portal screenshots and PowerShell results reviewed on 3 September 2026. It records basic metrics verification, healthy readiness, completed preparation and installation IN PROGRESS.
+[Monitoring and platform update validation](../../docs/11_Azure_Monitoring_and_Platform_Update_Validation.md) is a sanitized text record of operator-supplied portal screenshots and PowerShell results reviewed on 3 September 2026. It records basic metrics verification, healthy readiness, preparation, successful installation of 12.2608.1003.9 and fresh post-update validation, including interactive guest login.
 
-The corresponding raw screenshots have not been published here. The older Up to date image remains historical and must not be used as evidence that version 12.2608.1003.9 was installed. Final installation and post-update evidence are still pending.
+The corresponding raw screenshots have not been published here. The older Up to date image remains historical and must not be used as evidence that version 12.2608.1003.9 was installed. Final installation and post-update evidence are now recorded in docs/11 as sanitized text. The guest activation watermark and missing network metric values remain limitations, not silently closed items.
+

@@ -250,7 +250,7 @@ Status: **PASS**.
 | VM restart | PASS |
 | Azure Local workload VM start/stop/restart | PASS |
 | Azure monitoring and management validation | PASS (basic scope; see docs/11) |
-| Azure Local platform update / lifecycle validation | IN PROGRESS; post-update validation pending |
+| Azure Local platform update / lifecycle validation | PASS — 12.2608.1003.9 and post-update checks verified |
 
 ---
 
@@ -260,9 +260,12 @@ Status synchronized on **3 September 2026** with the [monitoring and update evid
 
 - Basic Azure monitoring: PASS within the recorded scope.
 - Fresh system readiness and update preparation: PASS.
-- Platform installation to 12.2608.1003.9: IN PROGRESS.
-- Final installed version and post-update validation: PENDING.
+- Platform installation to 12.2608.1003.9: PASS.
+- Final installed version and agreed post-update validation: PASS.
+- Workload VM Running and interactive guest login: PASS after authorized guest-password recovery.
+- Fresh CPU, memory and disk charts: PASS; network values remain unverified.
 
-Track the active update to a terminal result, then verify nodes, storage, quorum/witness, Azure connectivity, monitoring and workload health. Earlier VM lifecycle PASS results remain historical evidence, not proof of post-update operation.
+The [final update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) records fresh post-update results separately from earlier VM stop/start/restart tests. Guest password recovery succeeded through Azure Arc Run Command, followed by a logged-in WAC VMConnect desktop. No credentials are published. Review final deliverables next; guest Windows activation remains a separate follow-up.
 
 Do not expand scope beyond the accreditation requirements unless additional work is explicitly recorded as further understanding rather than accreditation evidence.
+
