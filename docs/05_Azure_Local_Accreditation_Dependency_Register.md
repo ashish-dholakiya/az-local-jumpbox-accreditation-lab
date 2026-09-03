@@ -408,6 +408,24 @@ The LocalBox administrator password is runtime-only input.
 
 ---
 
+
+### Cloud Witness and storage-access dependencies (3 September 2026)
+
+The startup recovery exposed ongoing dependencies beyond initial deployment success:
+
+| Dependency | Why it matters | Verified checkpoint / follow-up |
+| --- | --- | --- |
+| Witness configured in cluster quorum | An Online Cluster Group alone does not establish that a witness exists | Cloud Witness configured and Online |
+| Storage authentication permitted | The deployed key-based witness requires usable storage authentication | Access restored; witness configuration succeeded with the existing key |
+| Storage data-plane network path | Authentication settings alone do not provide network access | Recovery succeeded after restoring the intended selected-network access |
+| Governance compatibility | Subsequent policy or automation changes can affect required access | Temporary workaround; permanent resolution pending |
+| Exception expiry ownership | A reminder does not renew an exception | Follow-up and expiry recorded in the linked checkpoint |
+| Node and CSV readiness after startup | Node availability, volume health and witness health are separate checks | Both nodes Up; all three CSVs Online |
+
+The pinned [LocalBox deployment template](https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/azlocal.json) defines the witness storage account and storage-key secret used by cluster deployment. Its [parameter template](https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e640b82/azure_jumpstart_localbox/artifacts/azlocal.parameters.json) selects Cloud witness.
+
+See the [startup and Cloud Witness runbook](06_Azure_LocalBox_Deployment_Runbook.md#211-resume-an-existing-lab-and-troubleshoot-cloud-witness) and [dated recovery evidence and follow-up](10_Lab_Recovery_Checkpoint_and_Follow_Up.md). These are point-in-time recovery results, not a claim that long-term governance compatibility is resolved.
+
 ## 17. Presentation Positioning
 
 Recommended message:

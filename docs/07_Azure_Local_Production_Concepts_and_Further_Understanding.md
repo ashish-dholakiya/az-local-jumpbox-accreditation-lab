@@ -425,6 +425,17 @@ The first accreditation VM uses Standard security intentionally to isolate and v
 
 ---
 
+
+### Governance compatibility and witness operations
+
+The lab recovery illustrates three separate checks: cluster/node availability, storage-volume health, and quorum-witness health. An Online Cluster Group does not by itself prove a witness is configured; verify QuorumResource and the witness resource separately.
+
+For the key-based Cloud Witness implementation validated in this lab, storage authentication and network reachability are separate dependencies. A generic access-denied event does not prove an invalid key. Diagnose the specific Azure error and effective network path before rotating credentials.
+
+Production planning should assign ownership for witness access, credential lifecycle, network restrictions, governance changes and exception expiry. Use narrowly scoped, reviewed exceptions where needed and reassess them before expiry. The temporary lab workaround is not a production security recommendation or evidence of permanent policy compatibility.
+
+The [operational runbook](06_Azure_LocalBox_Deployment_Runbook.md#211-resume-an-existing-lab-and-troubleshoot-cloud-witness) provides the diagnostic sequence; the [dated lab checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md) records what was actually observed. These lessons do not claim production resilience testing was performed.
+
 ## 13. Guest Management and Azure Arc
 
 Guest management extends Azure-connected capabilities into the workload virtual machine.

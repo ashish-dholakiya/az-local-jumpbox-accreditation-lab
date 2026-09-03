@@ -579,6 +579,130 @@ After VM creation, validate backend provisioning and then exercise start, stop, 
 
 ---
 
+
+### 21.1 Resume an Existing Lab and Troubleshoot Cloud Witness
+
+This procedure captures the recovery verified on 3 September 2026. Use it when resuming the existing lab; do not restart deployment automation merely because the host was stopped. The [dated checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md) contains the outcome and follow-up dates.
+
+#### A. Confirm prerequisites and current state (read-only)
+
+Before starting the lab session, verify the active governance exception and its expiry where applicable, permitted storage authentication, and the intended storage network access. A portal save or exception-creation notification is not a health check.
+
+After the outer host and nested machines have started, run the following from an elevated PowerShell session directly on an Azure Local node:
+
+```powershell
+Get-ClusterNode |
+    Format-Table Name, State -AutoSize
+
+Get-ClusterQuorum |
+    Format-List Cluster, QuorumType, QuorumResource
+
+Get-ClusterResource |
+    Where-Object { $_.ResourceType -like '*Witness*' } |
+    Format-Table Name, State, ResourceType, OwnerNode -AutoSize
+
+Get-ClusterGroup -Name 'Cluster Group' |
+    Format-Table Name, State, OwnerNode -AutoSize
+
+Get-ClusterSharedVolume |
+    Format-Table Name, State, OwnerNode -AutoSize
+
+Get-VirtualDisk |
+    Format-Table FriendlyName, HealthStatus, OperationalStatus, DetachedReason -AutoSize
+
+Get-StorageJob |
+    Format-Table Name, JobState, PercentComplete -AutoSize
+```
+
+Capture actual state before changing anything. During the observed recovery, volumes became healthy while Cloud Witness remained failed. That sequence does not prove the witness caused the volume failures. Do not infer disk damage from a startup dashboard alone or change attachment policy solely because a disk reports Detached By Policy.
+
+#### B. Diagnose the specific remaining failure
+
+| Observed result | Interpretation and next check |
+| --- | --- |
+| Witness Online and QuorumResource populated | Witness is configured; no witness repair is needed |
+| No witness resource and empty QuorumResource | No witness is configured; an Online Cluster Group does not close this gap |
+| Witness Failed; event 1659 | Storage authentication/access failed; do not assume the key was rotated |
+| HTTP 403 with AuthorizationFailure | Inspect storage network access and firewall restrictions as well as the full error |
+| Shared-key access becomes disabled again | Inspect Activity Log changes and applicable policy; establish attribution before choosing remediation |
+| Network settings disappear or fail to save | Inspect the save result and Activity Log; a Deny rejection and a later configuration reversal are different cases |
+| Node, volume or storage job remains unhealthy | Investigate that layer separately; witness recovery is not proof of storage recovery |
+
+For a failed witness, inspect recent Failover Clustering events on its current owner node. Run this locally on that node:
+
+```powershell
+Get-WinEvent -FilterHashtable @{
+    LogName      = 'System'
+    ProviderName = 'Microsoft-Windows-FailoverClustering'
+    Id           = 1069, 1659
+    StartTime    = (Get-Date).AddMinutes(-30)
+} |
+    Select-Object TimeCreated, Id, Message |
+    Format-List
+```
+
+Compare timestamps in UTC before diagnosing clock skew. Review error output locally and sanitize it before publication.
+
+In Azure Portal, inspect the existing witness account:
+- Configuration: permitted authentication, including Allow storage account key access for this deployed key-based witness.
+- Networking: public-network mode, allowed networks, private endpoints and any network security perimeter.
+- Activity Log: the relevant write or policy event and its actual changed property.
+
+If the intended path uses selected virtual networks, confirm both the subnet's Microsoft.Storage service endpoint and the storage account's subnet rule. Public network access Disabled prevents this public-endpoint path. Do not widen access to all networks as a default troubleshooting step. See [Microsoft's network-rule guidance](https://learn.microsoft.com/en-us/azure/storage/common/storage-network-security-virtual-networks) and [403 diagnostic guidance](https://learn.microsoft.com/en-us/troubleshoot/azure/azure-storage/blobs/authentication/storage-troubleshoot-403-errors).
+
+#### C. Restore the approved access path (configuration change)
+
+Resolve the identified authentication/network restriction through the appropriate governance process. Record scope, owner, expiry and follow-up for any temporary exception. A whole-initiative lab waiver is not a default production remediation, and does not disable separate assignments or independent automation.
+
+Save the intended settings, reopen the portal page and verify that they persist. Allow for any propagation period reported by the service. Repeatedly re-enabling a setting while automation reverses it is not a durable fix.
+
+#### D. Recover the witness only if required (configuration change)
+
+If the witness exists but remains Failed after the access correction, attempt one controlled start:
+
+```powershell
+Start-ClusterResource -Name 'Cloud Witness' -Wait 60 -ErrorAction Stop
+```
+
+If it fails, inspect the new error rather than repeating the same start command.
+
+If the witness is absent, or evidence requires refreshing its configured credentials, use the existing approved storage account and current key. The following is the same recovery command pattern that succeeded in this lab, with the account name prompted to keep environment identifiers out of the example. Run directly on a cluster node in elevated PowerShell.
+
+```powershell
+$witnessAccount = Read-Host 'Existing witness storage account name'
+$witnessKey = Read-Host 'Existing witness storage account key' -AsSecureString
+
+try {
+    Set-ClusterQuorum `
+        -CloudWitness `
+        -AccountName $witnessAccount `
+        -Endpoint 'core.windows.net' `
+        -AccessKey ([System.Net.NetworkCredential]::new('', $witnessKey).Password) `
+        -ErrorAction Stop | Out-Null
+
+    Get-ClusterQuorum |
+        Format-List Cluster, QuorumType, QuorumResource
+
+    Get-ClusterResource -Name 'Cloud Witness' |
+        Format-List Name, State, OwnerNode
+}
+catch {
+    Write-Host "Cloud Witness configuration failed: $($_.Exception.Message)"
+}
+finally {
+    $witnessKey.Dispose()
+    Remove-Variable witnessKey, witnessAccount
+}
+```
+
+Use the Key value, not a connection string. Enter it only at the local secure prompt. The verified recovery reused an existing key; key regeneration was not required. This changes quorum configuration and is not a routine startup command. See [Microsoft's witness configuration guidance](https://learn.microsoft.com/en-us/windows-server/failover-clustering/deploy-quorum-witness).
+
+#### E. Verify and record closure (read-only)
+
+Repeat the node, quorum, witness, group and CSV checks from step A. Required recovery results are both nodes Up, QuorumResource Cloud Witness, witness and Cluster Group Online, and all CSVs Online. Check virtual-disk health and outstanding storage jobs separately if storage symptoms remain.
+
+Record the observed outcome and unresolved causes. Keep permanent governance follow-up open until it is resolved; a healthy witness today does not prove settings will persist through future evaluations or restarts. Resume the pending accreditation activity after readiness is verified.
+
 ## 22. Quick Reference URLs
 
 Microsoft Azure Arc Jumpstart repository:
