@@ -73,6 +73,34 @@ Work should be documented only after it has been executed or verified. Planned w
 
 Customer discovery, architecture design, and Azure subscription readiness have been performed. The current implementation priority is the required Jumpstart / LocalBox proof of concept defined in Activity 3 of the governing source-of-truth document.
 
+## Accreditation Delivery Status
+
+Status reviewed on **3 September 2026** against [the governing scope](docs/00_Accreditation_Scope_and_Customer_Scenario_Source_of_Truth.md), the repository inventory, prior session decisions, and published validation records. An artifact not found here is not assumed to be complete elsewhere.
+
+| Activity | Available evidence or content | Remaining deliverable / status |
+| --- | --- | --- |
+| 1. Discovery | [Assessment and discovery questionnaire](docs/01_Customer_Discovery_and_Assessment.md) | Content available; final concise 1–2-page submission format has not been verified |
+| 2. Architecture | [Architecture baseline](docs/02_Contoso_Azure_Local_Architecture.md) and diagram files under `diagrams/` | Baseline and diagrams available; required 5–10 technical slides not found or confirmed complete |
+| 3. LocalBox PoC | [Walkthrough](docs/04_Azure_LocalBox_Lab_Walkthrough.md), [VM/storage evidence](docs/08_Azure_Local_VM_WAC_Storage_and_Disk_Validation.md), [VM lifecycle evidence](docs/09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md), and [recovery checkpoint](docs/10_Lab_Recovery_Checkpoint_and_Follow_Up.md) | IN PROGRESS: monitoring/management NEXT; Azure Local platform update/lifecycle PENDING |
+| 4. VMware migration | High-level migration considerations in the architecture and production-concepts documents | Dedicated strategy covering tooling, dependencies, waves, downtime, validation and rollback not found; PENDING |
+| 5. Executive presentation | Customer and technical source material available | Required 10–15-slide executive deck not found; PENDING |
+| 6. Customer meeting preparation | Discovery questions and architecture rationale available as inputs | Dedicated meeting talking points / preparation deliverable not found; PENDING |
+| 7. Knowledge validation | Scope specifies eight written questions | Exact question set and completed answers not found in this repo; PENDING |
+
+### Scope and evidence boundaries
+
+- Completed Activity 3 checks include deployment, Arc connectivity, logical networking, VM creation, NIC/IP, guest management, WAC/storage validation, and workload VM stop/start/restart. Monitoring and Azure Local platform lifecycle are separate outcomes.
+- The portal screenshot showing an Up to date state is a recorded status snapshot, not evidence that a platform update operation was performed.
+- Architecture diagrams represent a proposed customer design, not the deployed LocalBox topology or proof that every pictured service was implemented. Review service labels, connectivity assumptions and support mappings before final slide delivery.
+- The customer site's count discrepancy remains open: 25 stated, 15 described, 10 undefined. Workload sizing, site placement, network characteristics and approved RPO/RTO are also discovery inputs, not confirmed facts.
+- OS-disk expansion guidance was documented; no resize was executed. Optional production topics in `docs/07` do not add mandatory lab tasks.
+- Permanent governance resolution and laptop repository synchronization remain operational follow-ups, separate from completed cluster recovery.
+- The immediate task remains Activity 3 monitoring prerequisite verification. This audit does not authorize skipping to later activities or claim they were executed.
+
+### Documentation completion check
+
+After each verified outcome, update its evidence record, affected dependency/runbook entries, current-status tables, this delivery matrix, and next-step pointers together. Verify semantic consistency and links as well as reading back the published files. Keep historical snapshots identifiable and distinguish completed tests from fresh live state.
+
 ## Operational Checkpoint: 3 September 2026
 
 Operator-supplied checks confirm both cluster nodes Up, Cloud Witness and Cluster Group Online, and all three cluster shared volumes Online.

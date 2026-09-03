@@ -4,11 +4,13 @@
 
 This document records the commands and verified results used to prepare the Azure subscription for the Azure Local Jumpstart / LocalBox accreditation lab.
 
-The checks are intentionally separated from the deployment steps so that subscription, permissions, provider registration, region and quota issues are identified before billable lab resources are created.
+The checks are separated from deployment so that subscription, permissions, providers, region and quota can be verified before a new allocation. The existing lab has already been deployed successfully. This document was reconciled on 3 September 2026 with the [verified walkthrough](04_Azure_LocalBox_Lab_Walkthrough.md) and [dependency register](05_Azure_Local_Accreditation_Dependency_Register.md); it is not a new live quota or access check.
 
-> **Active lab subscription:** `ME-MngEnvMCAP085303-v-dholakiyaa-1`
+> **Active lab subscription:** `<LAB-SUBSCRIPTION-NAME>`
 >
-> **Target Azure region:** `Central India`
+> **Target Azure region:** `Australia East` (`australiaeast`)
+>
+> **Deployed LocalBox host size:** `Standard_E32s_v5`
 >
 > The subscription ID is intentionally not stored in this public repository. Commands read it dynamically from the active Azure CLI context.
 
@@ -28,13 +30,13 @@ This is the first safety check. It prevents commands or deployments from running
 
 ```powershell
 az account show `
-    --query "{Name:name,SubscriptionId:id,State:state,IsDefault:isDefault}" `
+    --query "{Name:name,State:state,IsDefault:isDefault}" `
     -o table
 ```
 
 ### Verified result
 
-The active company subscription is `ME-MngEnvMCAP085303-v-dholakiyaa-1` and its state is `Enabled`.
+The selected lab subscription was verified as Enabled before deployment. Its display name is represented by a placeholder in this public document; confirm the actual selection locally.
 
 ### Change impact
 
@@ -98,6 +100,8 @@ $providers = @(
     "Microsoft.ResourceConnector",
     "Microsoft.Kubernetes",
     "Microsoft.KubernetesConfiguration",
+    "Microsoft.HybridContainerService",
+    "Microsoft.EdgeMarketplace",
     "Microsoft.ExtendedLocation",
     "Microsoft.Attestation",
     "Microsoft.Storage",
@@ -135,6 +139,8 @@ The company subscription was effectively fresh. `Microsoft.GuestConfiguration` w
 | `Microsoft.ResourceConnector` | Azure Resource Bridge and Azure-based management of Azure Local resources. |
 | `Microsoft.Kubernetes` | Azure Arc-enabled Kubernetes scenarios and related platform dependencies. |
 | `Microsoft.KubernetesConfiguration` | Kubernetes extensions, configuration management and GitOps capabilities. |
+| `Microsoft.HybridContainerService` | Required by the observed Azure Local Arc integration validation, even without an AKS demonstration. |
+| `Microsoft.EdgeMarketplace` | Azure Local marketplace and platform dependency included in the verified deployment provider set. |
 | `Microsoft.ExtendedLocation` | Custom Locations and Azure resources projected to an on-premises or edge location. |
 | `Microsoft.Attestation` | Attestation-related deployment and security workflows where required. |
 | `Microsoft.Storage` | Azure Storage resources used by deployment or operational workflows. |
@@ -142,7 +148,7 @@ The company subscription was effectively fresh. `Microsoft.GuestConfiguration` w
 | `Microsoft.Insights` | Azure Monitor, diagnostics and monitoring integration. |
 | `Microsoft.Compute` | Azure VM operations, VM SKU discovery and regional / VM-family compute quota checks. |
 
-`Microsoft.HybridContainerService` is not part of the current core registration set because the accreditation scope does not currently require an AKS-on-Azure-Local demonstration. It can be enabled later if the lab scope expands.
+The validated LocalBox deployment required `Microsoft.HybridContainerService` and `Microsoft.EdgeMarketplace`. Both reached Registered before validation succeeded, as recorded in the [dependency register](05_Azure_Local_Accreditation_Dependency_Register.md#4-mandatory-azure-local-resource-providers). Their registration is a deployment dependency and does not add an AKS demonstration to accreditation scope.
 
 ---
 
@@ -166,6 +172,8 @@ $providersToRegister = @(
     "Microsoft.ResourceConnector",
     "Microsoft.Kubernetes",
     "Microsoft.KubernetesConfiguration",
+    "Microsoft.HybridContainerService",
+    "Microsoft.EdgeMarketplace",
     "Microsoft.ExtendedLocation",
     "Microsoft.Attestation",
     "Microsoft.Storage",
@@ -209,7 +217,7 @@ foreach ($provider in $providersToRegister) {
 
 ### Verified result
 
-The required Azure Local and Azure Arc providers were confirmed as **Registered** on the company lab subscription. `Microsoft.GuestConfiguration` was already registered before the registration step. `Microsoft.Compute` was also made available before compute quota validation.
+The required deployment providers were confirmed as **Registered**. `Microsoft.GuestConfiguration` was already registered before the initial registration step. The later deployment validation identified and verified `Microsoft.HybridContainerService` and `Microsoft.EdgeMarketplace`; the command lists above now include both. This reconciles the initial readiness procedure with the final deployment evidence.
 
 ### Readiness status
 
@@ -221,100 +229,57 @@ The required Azure Local and Azure Arc providers were confirmed as **Registered*
 
 ---
 
-## 7. Lock the Deployment Region
+## 7. Locked Deployment Baseline
 
-### Decision
-
-The accreditation lab will use:
+The deployed accreditation lab uses:
 
 ```text
-Central India
+Azure resource region        australiaeast
+Azure Local instance region  australiaeast
+LocalBox host size           Standard_E32s_v5
 ```
 
-### Why this matters
-
-VM SKU availability, subscription quota and deployment support are evaluated per Azure region. All subsequent quota and LocalBox SKU checks therefore use `centralindia`.
+These values are verified in the walkthrough and dependency register. Use them consistently in accreditation-facing documentation. The successful deployment establishes historical host usability; it does not guarantee current spare quota or capacity for another allocation.
 
 ---
 
-## 8. Check Central India Compute Quota
+## 8. Check Australia East Compute Quota Before a New Allocation
 
-### What this command does
+For a new deployment or capacity change, check regional and relevant VM-family headroom in the active subscription.
 
-Displays Azure Compute quota and current usage for Central India.
-
-### Why we run it
-
-LocalBox uses a large Azure VM. Even when permissions and providers are ready, insufficient regional or VM-family quota can block deployment.
-
-### Command
+**Read-only reference command; not rerun during this documentation audit:**
 
 ```powershell
 az vm list-usage `
-    --location centralindia `
+    --location australiaeast `
     -o table
 ```
 
-### Verified result
+Compare the requested allocation with current usage and limits. Do not reuse quota numbers from another region or treat a past deployment as a current capacity reservation.
 
-The company lab subscription currently has the following Central India compute capacity:
-
-```text
-Total Regional vCPUs              Used: 0    Limit: 100
-Standard Esv6 Family vCPUs        Used: 0    Limit: 100
-```
-
-The planned `Standard_E32s_v6` LocalBox host requires 32 vCPUs. The subscription therefore has sufficient headroom in both the regional quota and the Esv6 family quota.
-
-### Readiness status
-
-**PASS.** No compute quota increase is currently required for a single 32-vCPU LocalBox host in Central India.
-
-### Change impact
-
-**Read-only.** No Azure resource is changed.
+**Evidence status:** the existing host deployment succeeded. Current spare quota values were not collected in this audit. No additional quota test is required solely to update this document or to repeat a completed accreditation deployment.
 
 ---
 
-## 9. Check LocalBox VM SKU Availability in Central India
+## 9. Check Host SKU Restrictions Before a New Allocation
 
-### What this command does
+For a fresh allocation, inspect the intended host SKU in the correct region.
 
-Checks whether the candidate LocalBox VM SKU is available in Central India.
-
-### Why we run it
-
-Quota alone is not enough. The selected VM size must also be available in the target region.
-
-### Lightweight validation command used during the lab
+**Read-only reference command; not rerun during this documentation audit:**
 
 ```powershell
-az vm list-sizes `
-    --location centralindia `
-    --query "[?name=='Standard_E32s_v6']" `
-    -o table
+az vm list-skus `
+    --location australiaeast `
+    --resource-type virtualMachines `
+    --size Standard_E32s_v5 `
+    --all `
+    --query "[?name=='Standard_E32s_v5'].{Name:name,Locations:locations,Restrictions:restrictions}" `
+    -o json
 ```
 
-> `az vm list-sizes` is deprecated, but it returned a valid lightweight SKU-availability check when `az vm list-skus --all` was slow in Cloud Shell. For future runs, prefer `az vm list-skus` where practical.
+Review restrictions rather than treating inclusion in the response as permission to allocate. The `--all` option includes restricted SKUs. See [Microsoft's SKU troubleshooting guidance](https://learn.microsoft.com/en-us/azure/azure-resource-manager/troubleshooting/error-sku-not-available).
 
-### Verified result
-
-`Standard_E32s_v6` was returned in Central India with:
-
-```text
-Name:              Standard_E32s_v6
-NumberOfCores:     32
-MemoryInMB:        262144
-MaxDataDiskCount:  64
-```
-
-### Readiness status
-
-**PASS.** `Standard_E32s_v6` is visible in Central India for the current subscription context.
-
-### Change impact
-
-**Read-only.** No Azure resource is created.
+**Recorded result:** `Standard_E32s_v5` was successfully deployed in Australia East. A fresh capacity guarantee or new SKU response is not claimed here.
 
 ---
 
@@ -363,33 +328,36 @@ The installation completed successfully and `az bicep version` returned Bicep CL
 
 For the accreditation walkthrough, capture the following without exposing confidential identifiers or credentials:
 
-1. Active company subscription name and Enabled state.
+1. Correct subscription context and Enabled state, with the display name sanitized for publication.
 2. Effective Owner access confirmation.
 3. Initial provider status.
 4. Provider registration commands used.
 5. Final provider registration status.
-6. Central India region decision.
-7. Central India quota result.
-8. `Standard_E32s_v6` availability result.
+6. Australia East deployment configuration.
+7. A dated quota result when a new allocation requires verification.
+8. The recorded `Standard_E32s_v5` deployment, or a fresh SKU-restriction result for a new allocation.
 9. Azure CLI and Bicep version checks.
-10. Final deployment readiness decision.
+10. Deployment outcome and its linked validation evidence.
 
 The repository is public. Full subscription IDs, credentials, secrets and internal company information should not be committed unless they are explicitly safe for public disclosure.
 
 ---
 
-## 12. Current Readiness Status
+## 12. Recorded Readiness and Current Position
 
-| Check | Status |
+| Check | Status and evidence boundary |
 | --- | --- |
-| Correct company subscription active | PASS |
-| Effective Owner access | PASS |
-| Required Azure Local / Arc / Compute providers | PASS |
-| Target region selected: Central India | PASS |
-| Central India compute quota | PASS |
-| `Standard_E32s_v6` availability | PASS |
-| Azure CLI readiness | PASS |
-| Bicep readiness | PASS |
-| Final LocalBox deployment decision | PENDING |
+| Correct lab subscription and effective access | PASS at the recorded deployment checkpoint |
+| Required Azure Local / Arc / Compute providers | PASS; final deployment dependencies included |
+| Target region: Australia East | PASS; deployed baseline |
+| `Standard_E32s_v5` host deployment | PASS; recorded in the walkthrough |
+| Current spare quota / availability for another allocation | Not rechecked; verify when a new allocation or size change is needed |
+| Azure CLI and Bicep readiness | PASS at the recorded tooling checkpoint |
+| LocalBox deployment | COMPLETE; not awaiting a pre-deployment decision |
+| Workload VM creation, network, guest management and start/stop/restart | PASS; see the VM validation record |
+| Azure monitoring and management | NEXT / pending validation |
+| Azure Local platform update/lifecycle | PENDING |
 
-All subscription, permission, provider, region, quota, SKU and client-tooling readiness checks completed so far are **PASS**. The next implementation step is the final LocalBox pre-deployment GO / NO-GO review before any billable lab resources are created.
+Continue with the monitoring prerequisite described in the [current recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md). Do not restart a pre-deployment GO / NO-GO review merely because this readiness procedure predates the completed deployment.
+
+Readiness checks for a fresh deployment remain reusable; existing PASS entries describe recorded evidence and must not be presented as new live checks.

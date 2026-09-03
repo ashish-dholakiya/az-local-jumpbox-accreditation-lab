@@ -315,8 +315,8 @@ Status: **PASS**.
 Two Azure Local workload storage paths were discovered and validated before VM lifecycle work:
 
 ```text
-UserStorage1-62e88607ab3c4e25b3dbe4a59b0586c3
-UserStorage2-96458537fbbd4688a9cb1745f822f5d2
+UserStorage1-<storage-path-id>
+UserStorage2-<storage-path-id>
 ```
 
 Both reported `Succeeded` and mapped to cluster storage paths under `C:\ClusterStorage`.
