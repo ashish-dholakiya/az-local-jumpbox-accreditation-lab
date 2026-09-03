@@ -249,28 +249,20 @@ Status: **PASS**.
 | VM start | PASS |
 | VM restart | PASS |
 | Azure Local workload VM start/stop/restart | PASS |
-| Azure monitoring and management validation | NEXT / pending validation |
-| Azure Local platform update / lifecycle validation | PENDING |
+| Azure monitoring and management validation | PASS (basic scope; see docs/11) |
+| Azure Local platform update / lifecycle validation | IN PROGRESS; post-update validation pending |
 
 ---
 
 ## 10. Next Required Step
 
-The next controlled Activity 3 task is:
+Status synchronized on **3 September 2026** with the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md):
 
-```text
-Azure monitoring and management validation
-```
+- Basic Azure monitoring: PASS within the recorded scope.
+- Fresh system readiness and update preparation: PASS.
+- Platform installation to 12.2608.1003.9: IN PROGRESS.
+- Final installed version and post-update validation: PENDING.
 
-Next sequence, synchronized on 3 September 2026 after the [lab recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md):
+Track the active update to a terminal result, then verify nodes, storage, quorum/witness, Azure connectivity, monitoring and workload health. Earlier VM lifecycle PASS results remain historical evidence, not proof of post-update operation.
 
-```text
-1. Verify the AzureEdgeTelemetryAndDiagnostics extension prerequisite.
-2. Validate Azure-based monitoring and management against the required evidence scope.
-3. Record only verified results and sanitized evidence.
-4. Then validate Azure Local platform update and lifecycle management.
-```
-
-Completed workload VM start/stop/restart is separate from the pending Azure Local platform update/lifecycle activity.
-
-Do not expand scope beyond the accreditation requirements unless the additional work is explicitly recorded as further understanding rather than accreditation evidence.
+Do not expand scope beyond the accreditation requirements unless additional work is explicitly recorded as further understanding rather than accreditation evidence.

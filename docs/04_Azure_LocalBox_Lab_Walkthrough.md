@@ -362,7 +362,7 @@ Verified portal observations include:
 
 ![Azure Local cluster updates and management view](../evidence/portal/azure-local-cluster-overview-updates.png)
 
-*Figure 2. Sanitized Azure Local portal evidence showing the current update and cluster management state.*
+*Figure 2. Historical sanitized Azure Local portal snapshot; not the current update state or proof of a completed update run.*
 
 The source screenshots were sanitized before being committed to the public repository. Full subscription IDs, account identifiers, tenant identifiers, credentials, and other sensitive values are intentionally excluded.
 
@@ -492,7 +492,7 @@ Status: **PASS**.
 
 ## 16. Current Activity 3 Status
 
-Status synchronized on **3 September 2026** with the [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). PASS refers to the recorded validation; it does not represent a new test in this documentation update. Workload VM start/stop/restart is complete; Azure Local platform update/lifecycle validation is a separate pending activity.
+Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Basic Azure monitoring is verified; system readiness and update preparation passed. Platform update installation is IN PROGRESS; final completion and post-update validation remain pending.
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -513,8 +513,8 @@ Status synchronized on **3 September 2026** with the [VM network, guest-manageme
 | Logical workload networking validation | PASS |
 | Azure Local Marketplace VM image | PASS |
 | Azure Local workload VM creation and start/stop/restart | PASS |
-| Azure monitoring and management validation | NEXT / pending validation |
-| Azure Local platform update and lifecycle validation | PENDING |
+| Azure monitoring and management validation | PASS (basic scope; see docs/11) |
+| Azure Local platform update and lifecycle validation | IN PROGRESS; post-update validation pending |
 
 ---
 
@@ -522,10 +522,10 @@ Status synchronized on **3 September 2026** with the [VM network, guest-manageme
 
 Workload VM creation, NIC/IP, guest management, and start/stop/restart have been verified. See [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and the subsequent [lab recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md).
 
-Continue one outcome at a time:
+Basic monitoring is verified in the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). The platform update is already installing; do not launch a competing run.
 
-1. Verify the `AzureEdgeTelemetryAndDiagnostics` extension prerequisite for Activity 3 monitoring and management.
-2. Validate Azure-based monitoring and management, capturing the required sanitized evidence.
-3. Then validate Azure Local platform update and lifecycle operations.
+1. Track the current installation to a terminal result.
+2. If successful, verify version, nodes, storage, quorum/witness, Azure connectivity, monitoring and workload health.
+3. Record actual post-update results before marking platform lifecycle complete.
 
 Do not repeat completed VM lifecycle work solely because an earlier deployment section describes it. Each remaining outcome must be executed, verified, and recorded before being marked complete.

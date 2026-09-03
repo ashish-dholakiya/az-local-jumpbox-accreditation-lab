@@ -355,9 +355,9 @@ The repository is public. Full subscription IDs, credentials, secrets and intern
 | Azure CLI and Bicep readiness | PASS at the recorded tooling checkpoint |
 | LocalBox deployment | COMPLETE; not awaiting a pre-deployment decision |
 | Workload VM creation, network, guest management and start/stop/restart | PASS; see the VM validation record |
-| Azure monitoring and management | NEXT / pending validation |
-| Azure Local platform update/lifecycle | PENDING |
+| Azure monitoring and management | PASS (basic scope; see docs/11) |
+| Azure Local platform update/lifecycle | IN PROGRESS; post-update validation pending |
 
-Continue with the monitoring prerequisite described in the [current recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md). Do not restart a pre-deployment GO / NO-GO review merely because this readiness procedure predates the completed deployment.
+Continue tracking the platform installation and pending post-update checks in the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). Do not restart a pre-deployment GO / NO-GO review merely because this readiness procedure predates the completed deployment.
 
 Readiness checks for a fresh deployment remain reusable; existing PASS entries describe recorded evidence and must not be presented as new live checks.

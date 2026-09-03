@@ -381,7 +381,7 @@ The LocalBox administrator password is runtime-only input.
 
 ## 16. Current Dependency Readiness
 
-Status synchronized on **3 September 2026** with the [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). PASS refers to the recorded validation; it does not represent a new test in this documentation update. Workload VM start/stop/restart is complete; Azure Local platform update/lifecycle validation is a separate pending activity.
+Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Basic Azure monitoring is verified; system readiness and update preparation passed. Platform update installation is IN PROGRESS; final completion and post-update validation remain pending.
 
 | Area | Status |
 | --- | --- |
@@ -405,13 +405,25 @@ Status synchronized on **3 September 2026** with the [VM network, guest-manageme
 | Workload storage readiness | PASS |
 | Azure Local Marketplace VM image | PASS |
 | Azure Local workload VM creation and start/stop/restart | PASS |
-| Azure monitoring and management | NEXT / pending validation |
-| Azure Local platform update and lifecycle validation | PENDING |
+| Azure monitoring and management | PASS (basic scope; see docs/11) |
+| Azure Local platform update and lifecycle validation | IN PROGRESS; post-update validation pending |
 
 ---
 
 
-Next: verify the `AzureEdgeTelemetryAndDiagnostics` extension prerequisite before collecting the remaining monitoring and management evidence.
+Next: track the active platform installation, then perform post-update validation. See the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) for the verified monitoring scope and completion gates.
+
+### Monitoring and update dependencies (3 September 2026)
+
+| Dependency | Verified result / limitation |
+| --- | --- |
+| Telemetry extension on both nodes | TelemetryAndDiagnostics 2.0.48.0, Succeeded; automatic upgrade Enabled |
+| Azure monitoring data | CPU, memory and disk graphs verified; network metric values not verified |
+| Fresh system health | Success in PowerShell; Healthy in portal after earlier critical results |
+| Update preparation | 12.2608.1003.9 Prepared; readiness passed with two Informational checks |
+| Installation and post-update health | Installation IN PROGRESS; final version and post-update checks pending |
+
+Earlier healthy dependencies are point-in-time results. Do not claim post-update health before the active run completes.
 
 ### Cloud Witness and storage-access dependencies (3 September 2026)
 

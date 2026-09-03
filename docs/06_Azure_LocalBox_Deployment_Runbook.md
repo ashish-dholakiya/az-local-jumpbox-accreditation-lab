@@ -560,7 +560,7 @@ Network  localbox-vm-lnet-vlan200
 
 After VM creation, validate backend provisioning and then exercise start, stop, restart, and management operations before marking VM lifecycle complete.
 
-**Existing lab: complete.** Workload VM creation, NIC/IP, guest management, and start/stop/restart are verified in [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). This section remains a deployment procedure, not the current next task. Resume monitoring prerequisite verification for `AzureEdgeTelemetryAndDiagnostics`, followed by the required Azure monitoring/management evidence and then Azure Local platform update/lifecycle validation.
+**Existing workload VM stage: complete.** Workload VM creation, NIC/IP, guest management, and start/stop/restart are verified in [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). This section remains a deployment procedure, not the current next task. Basic monitoring has subsequently been verified. Follow section 21.2 and the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) for the platform installation already in progress and its pending completion gates.
 
 ---
 
@@ -705,6 +705,35 @@ Repeat the node, quorum, witness, group and CSV checks from step A. Required rec
 
 Record the observed outcome and unresolved causes. Keep permanent governance follow-up open until it is resolved; a healthy witness today does not prove settings will persist through future evaluations or restarts. Resume the pending accreditation activity after readiness is verified.
 
+### 21.2 Monitor Azure Data and Track Platform Updates
+
+The [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md) records the executed sequence and current status. Basic monitoring and system readiness are verified; update preparation completed and installation is IN PROGRESS. This section is a reusable procedure, not an instruction to start another run.
+
+1. Verify the telemetry extension on both Arc nodes, then inspect actual cluster metrics under Overview > Monitoring. Extension provisioning alone is not proof of data delivery. Separate missing metric values from zero traffic.
+2. For Session expired, reauthenticate the portal session before changing cluster configuration. For heartbeat alerts, inspect timestamps and current connection evidence; User response New is not an independent health result.
+3. Inspect Updates > Update readiness and individual check timestamps. Compare old critical results with current node, CSV and virtual-disk state. A blank results list is not a PASS.
+4. When appropriate, use Check again once and allow the system check to finish. Read HealthState and HealthCheckDate with Get-SolutionUpdateEnvironment. InProgress with a placeholder date is not success or a clock fault.
+5. Review the target version, components and reboot uncertainty. In this lab, preparation used the portal Prepare workflow; it downloaded/validated content and performed health checks before installation.
+6. With readiness passed, review the single-system update and confirm installation only within an approved maintenance window. Keep the outer host running and avoid competing cluster changes or manual node restarts.
+7. Use the following read-only commands, or the active Updates > History run, to inspect progress:
+
+```powershell
+Get-Date -Format o
+
+Get-SolutionUpdate |
+    Where-Object { $_.Version -eq '12.2608.1003.9' } |
+    Format-List Version, State, UpdateStateProperties, HealthState
+
+Get-SolutionUpdateEnvironment |
+    Format-List CurrentVersion, HealthState, HealthCheckDate, State
+```
+
+The version filter is specific to this recorded run. Prepared is not Installed. AppliedSuccessfully at environment level must be read together with CurrentVersion and the selected update's terminal result. Unknown on unstarted steps is not by itself failure; inspect actual step timing and errors.
+
+After installation completes, verify the target version, system health, node and storage state, Cloud Witness/quorum, Azure connectivity and workload access. The read-only checks in section 21.1 are reusable; its repair commands are conditional and must not be run simply for validation. Record final evidence before changing the platform lifecycle status to PASS.
+
+References: [portal update workflow](https://learn.microsoft.com/en-us/azure/azure-local/update/azure-update-manager-23h2), [health-check troubleshooting](https://learn.microsoft.com/en-us/azure/azure-local/update/update-troubleshooting-23h2), [update phases](https://learn.microsoft.com/en-us/azure/azure-local/update/update-phases-23h2).
+
 ## 22. Quick Reference URLs
 
 Microsoft Azure Arc Jumpstart repository:
@@ -731,7 +760,7 @@ https://github.com/microsoft/azure_arc/blob/3f433866757688d926ae6707e9c0041d8e64
 
 ## Current Verified Checkpoint
 
-Status synchronized on **3 September 2026** with the [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). PASS refers to the recorded validation; it does not represent a new test in this documentation update. Workload VM start/stop/restart is complete; Azure Local platform update/lifecycle validation is a separate pending activity.
+Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Basic Azure monitoring is verified; system readiness and update preparation passed. Platform update installation is IN PROGRESS; final completion and post-update validation remain pending.
 
 The [recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md) additionally records both nodes Up, Cloud Witness and Cluster Group Online, and all three CSVs Online. Permanent governance resolution remains pending.
 
@@ -758,8 +787,8 @@ Workload VM creation                 PASS
 Workload NIC/IP validation           PASS
 Guest management / Arc validation    PASS
 Workload VM stop/start/restart        PASS
-Azure monitoring and management      NEXT / pending validation
-Azure Local platform update/lifecycle PENDING
+Azure monitoring and management      PASS (basic scope; see docs/11)
+Azure Local platform update/lifecycle IN PROGRESS; final validation pending
 ```
 
-Next controlled task: verify the `AzureEdgeTelemetryAndDiagnostics` extension prerequisite. Do not rerun completed workload VM lifecycle validation solely to advance this checkpoint.
+Next controlled infrastructure task: track the active installation to its final result, then perform the post-update checks in the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). Documentation may proceed during installation. Do not repeat preparation or installation, or mark earlier VM/storage PASS results as post-update evidence.

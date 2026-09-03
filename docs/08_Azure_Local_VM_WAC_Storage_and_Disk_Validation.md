@@ -449,7 +449,7 @@ Do not use LocalBox storage performance as a production benchmark.
 
 ## 18. Current Activity 3 Checkpoint
 
-Status synchronized on **3 September 2026** with the [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md). PASS refers to the recorded validation; it does not represent a new test in this documentation update. Workload VM start/stop/restart is complete; Azure Local platform update/lifecycle validation is a separate pending activity.
+Status synchronized on **3 September 2026** with the [VM lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) and [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). PASS refers to recorded operator evidence, not a new live test by this documentation update. Basic Azure monitoring is verified; system readiness and update preparation passed. Platform update installation is IN PROGRESS; final completion and post-update validation remain pending.
 
 | Implementation checkpoint | Status |
 | --- | --- |
@@ -473,8 +473,8 @@ Status synchronized on **3 September 2026** with the [VM network, guest-manageme
 | NIC / workload IP validation | PASS |
 | Guest-management verification | PASS |
 | Workload VM lifecycle start/stop/restart | PASS |
-| Azure monitoring and management validation | NEXT / pending validation |
-| Azure Local platform update/lifecycle validation | PENDING |
+| Azure monitoring and management validation | PASS (basic scope; see docs/11) |
+| Azure Local platform update/lifecycle validation | IN PROGRESS; post-update validation pending |
 
 ---
 
@@ -482,6 +482,6 @@ Status synchronized on **3 September 2026** with the [VM network, guest-manageme
 
 The subsequent [VM network, guest-management and lifecycle evidence](09_Azure_Local_VM_Network_Guest_Management_and_Lifecycle_Validation.md) confirms NIC/IP, guest management, and VM stop/start/restart are complete. The [lab recovery checkpoint](10_Lab_Recovery_Checkpoint_and_Follow_Up.md) records the later startup and witness recovery.
 
-Continue with Activity 3 monitoring and management, starting with the `AzureEdgeTelemetryAndDiagnostics` extension prerequisite. Capture the required monitoring evidence, then proceed to Azure Local platform update/lifecycle validation.
+Basic monitoring verification and platform preparation are complete; installation is now IN PROGRESS. See the [monitoring and update evidence](11_Azure_Monitoring_and_Platform_Update_Validation.md). Wait for the installation result before collecting post-update workload/storage evidence.
 
 The VM should not be resized or otherwise changed merely to demonstrate capability unless that change is required by the accreditation task.
