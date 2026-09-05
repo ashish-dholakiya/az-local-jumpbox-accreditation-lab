@@ -109,3 +109,51 @@ A governance follow-up reminder is scheduled for **14 September 2026 around 09:0
 
 See [Lab Recovery Checkpoint and Follow-up](docs/10_Lab_Recovery_Checkpoint_and_Follow_Up.md) for reminder and expiry details. The current [monitoring and update checkpoint](docs/11_Azure_Monitoring_and_Platform_Update_Validation.md) records platform lifecycle and agreed post-update validation PASS. Network metrics remain unverified, historical alert closure is not established, and guest Windows activation remains a separate follow-up. Final customer deliverables and overall accreditation acceptance are not yet complete.
 
+---
+
+# AKS Enabled by Azure Arc
+
+## Overview
+
+The Azure Local lab has been extended to include **AKS enabled by Azure Arc** as an additional accreditation workload. The implementation demonstrates Kubernetes deployment, Azure Arc integration, Arc Networking, MetalLB load balancing, workload validation, and operational evidence collection.
+
+## Current Implementation Status
+
+| Component | Status |
+|----------|--------|
+| Azure Local | ✅ Complete |
+| Azure Arc | ✅ Complete |
+| AKS Enabled by Azure Arc | ✅ Complete |
+| Arc Networking | ✅ Complete |
+| MetalLB Load Balancer | ✅ Complete |
+| Sample NGINX Workload | ✅ Complete |
+| Browser Validation | ✅ Complete |
+| Azure Monitor Extension | ✅ Installed |
+| Container Insights Telemetry | ⏳ Follow-up |
+
+## AKS Documentation
+
+- `docs/12_AKS_Enabled_by_Azure_Arc_Minimal_PoC.md`
+- `docs/12.1_AKS_Troubleshooting.md`
+- `docs/12.2_AKS_Evidence_Guide.md`
+- `docs/12.3_AKS_Presentation_Guide.md`
+- `docs/12.4_AKS_Lessons_Learned.md`
+
+## Evidence Package
+
+```
+evidence/
+└── aks
+    ├── Evidence-Manifest.md
+    ├── Screenshot-Index.md
+    ├── Validation-Summary.md
+    ├── Monitoring-Findings.md
+    ├── Presentation-Mapping.md
+```
+
+## Next Roadmap
+
+- Azure Virtual Desktop
+- GitOps
+- Production Monitoring
+- Azure Local Operational Excellence
